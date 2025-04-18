@@ -1,74 +1,294 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    // NOTE: When using mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model Manufacturer {
+  id            Int             @id @default(autoincrement())
+  name          String
+  logo          String?
+  categories    String[]
+  rating        Float
+  deliveryTime  String
+  products      myProduct[]
+  orders        Order[]
 
-    createdBy   User   @relation(fields: [createdById], references: [id])
-    createdById String
 
-    @@index([name])
+  middleMenRelation middleMenRelation[]
 }
 
-// Necessary for Next auth
-model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String? // @db.Text
-    access_token             String? // @db.Text
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String? // @db.Text
-    session_state            String?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    refresh_token_expires_in Int?
+model myProduct {
+  id            Int     @id @default(autoincrement())
+  manufacturerId Int
+  manufacturer  Manufacturer @relation(fields: [manufacturerId], references: [id])
+  name          String
+  skuId         Int 
+  category      String
+  price         Float
+  minOrder      Int @default(1) 
+  inStock       Boolean @default(false)
+  batches batches[]
 
-    @@unique([provider, providerAccountId])
+  orderItem orderItem[]
+
+  inventory inventory[]
 }
 
-model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model batches {
+  id            Int     @id @default(autoincrement())
+  skuId     Int
+  batchNumber   String
+  manufactureDate DateTime @db.Date
+  expiryDate    DateTime @db.Date
+  quantity      Int
+  product       myProduct @relation(fields: [skuId], references: [id])
+
+
+
+  InventoryBatch InventoryBatch[]
 }
 
-model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    posts         Post[]
+model Order {
+  id             String   @id @default(uuid())
+  manufacturerId Int
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  date           DateTime @db.Date
+  total          Float @default(0)
+  status         orderStatus @default(PENDING)
+
+  orderItem orderItem[] 
+  middleMenRelation middleMenRelation? @relation(fields: [middleMenRelationid], references: [id])
+  middleMenRelationid Int?
+
+  shopkeeper shopkeeper? @relation(fields: [shopkeeperId], references: [id])
+  shopkeeperId Int?
 }
 
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
 
-    @@unique([identifier, token])
+
+model orderItem {
+  id             Int     @id @default(autoincrement())
+  orderId        String
+  order          Order   @relation(fields: [orderId], references: [id])
+  productId      Int
+  product        myProduct @relation(fields: [productId], references: [id])
+  quantity       Int
+  price          Float
+  totalPrice     Float @default(0)
 }
+
+model middleMen{
+    id            Int     @id @default(autoincrement())
+    name          String
+    logo          String?
+    categories    String[]
+    rating        Float
+    deliveryTime  String
+
+
+
+    middleMenRelation middleMenRelation[]
+}
+
+model middleMenRelation {
+  id            Int     @id @default(autoincrement())
+  middleMenId   Int
+  middleMen     middleMen @relation(fields: [middleMenId], references: [id])
+  
+  deliveryTime  String
+  isApproved     Boolean @default(false)
+
+  manufacturerId Int @unique
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  orders      Order[]
+}
+
+// SHOP 
+model shopkeeper{
+    id            Int     @id @default(autoincrement())
+    name          String
+    categories    String[]
+    rating        Float
+    deliveryTime  String
+    
+    orders        Order[]
+
+    shopItem shopItem[]
+
+    billing billing[]
+}
+
+model shopItem {
+  id            Int     @id @default(autoincrement())
+  shopkeeperId  Int
+  shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
+
+  inventoryId Int @unique
+  inventory      inventory   @relation(fields: [inventoryId], references: [id])
+
+  price         Float
+
+
+  billItem billItem[]
+}
+
+model inventory {
+  id            Int     @id @default(autoincrement())
+  skuId     Int?
+  quantity      Int
+  product       myProduct? @relation(fields: [skuId], references: [id])
+
+  shopItem        shopItem? 
+inventoryBatches InventoryBatch[]
+}
+
+model InventoryBatch {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int
+  batchId     Int?
+
+  inventory   inventory @relation(fields: [inventoryId], references: [id])
+  batch       batches?   @relation(fields: [batchId], references: [id])
+  quantity    Int
+}
+
+model billing{
+    id            Int     @id @default(autoincrement())
+    shopkeeperId  Int
+    shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
+
+
+    amount        Float
+    paymentMethod String
+    invoice       String?
+    invoiceDate   DateTime @db.Date
+    
+
+    billItem billItem[]
+
+    customer customer? @relation(fields: [customerId], references: [id])
+    customerId Int?
+}
+model billItem{
+    id            Int     @id @default(autoincrement())
+    billingId     Int
+    billing       billing @relation(fields: [billingId], references: [id])
+    
+    shopitemId Int
+    shopitem     shopItem @relation(fields: [shopitemId], references: [id])
+   
+    quantity      Int
+    price         Float
+    totalPrice    Float @default(0)
+}
+
+// CUSTOMER
+model customer{
+    id            Int     @id @default(autoincrement())
+    name          String
+    mobile String @unique
+    tier         String @default("Bronze")
+
+    billing billing[]
+}
+enum orderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  REJECTED
+  APPROVED
+}
+
+
+
+
+
+
+
+
+// model LowStockItem {
+//   id           Int    @id @default(autoincrement())
+//   name         String
+//   currentStock Int
+//   minStock     Int
+// }
+
+// model DailySalesData {
+//   id           Int    @id @default(autoincrement())
+//   day          String
+//   sales        Float
+//   transactions Int
+// }
+
+// model WeeklySalesData {
+//   id           Int    @id @default(autoincrement())
+//   week         String
+//   sales        Float
+//   transactions Int
+// }
+
+// model ProductPerformanceData {
+//   id    Int     @id @default(autoincrement())
+//   name  String
+//   value Float
+//   color String
+// }
+
+// model FastMovingProduct {
+//   id     Int    @id @default(autoincrement())
+//   name   String
+//   sales  Int
+//   growth Int
+// }
+
+// model SlowMovingProduct {
+//   id     Int    @id @default(autoincrement())
+//   name   String
+//   sales  Int
+//   growth Int
+// }
+
+// model RestockingSuggestion {
+//   id             Int    @id @default(autoincrement())
+//   name           String
+//   currentStock   Int
+//   suggestedStock Int
+//   priority       String
+// }
+
+// model RegionalDemandData {
+//   id     Int    @id @default(autoincrement())
+//   region String
+//   demand Int
+//   growth Int
+// }
+
+// model SalesForecastData {
+//   id      Int     @id @default(autoincrement())
+//   month   String
+//   actual  Float?
+//   forecast Float?
+// }
+
+// model HeatmapData {
+//   id     Int    @id @default(autoincrement())
+//   day    String
+//   field00to04 Int
+//   field04to08 Int
+//   field08to12 Int
+//   field12to16 Int
+//   field16to20 Int
+//   field20to24 Int
+// }
+
+// model Alert {
+//   id       Int    @id @default(autoincrement())
+//   type     String
+//   product  String
+//   message  String
+//   severity String
+// }
