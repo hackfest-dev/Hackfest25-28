@@ -94,3 +94,201 @@ model middleMen{
     middleMenRelation middleMenRelation[]
 }
 
+model middleMenRelation {
+  id            Int     @id @default(autoincrement())
+  middleMenId   Int
+  middleMen     middleMen @relation(fields: [middleMenId], references: [id])
+  
+  deliveryTime  String
+  isApproved     Boolean @default(false)
+
+  manufacturerId Int @unique
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  orders      Order[]
+}
+
+// SHOP 
+model shopkeeper{
+    id            Int     @id @default(autoincrement())
+    name          String
+    categories    String[]
+    rating        Float
+    deliveryTime  String
+    
+    orders        Order[]
+
+    shopItem shopItem[]
+
+    billing billing[]
+}
+
+model shopItem {
+  id            Int     @id @default(autoincrement())
+  shopkeeperId  Int
+  shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
+
+  inventoryId Int @unique
+  inventory      inventory   @relation(fields: [inventoryId], references: [id])
+
+  price         Float
+
+
+  billItem billItem[]
+}
+
+model inventory {
+  id            Int     @id @default(autoincrement())
+  skuId     Int?
+  quantity      Int
+  product       myProduct? @relation(fields: [skuId], references: [id])
+
+  shopItem        shopItem? 
+inventoryBatches InventoryBatch[]
+}
+
+model InventoryBatch {
+  id          Int       @id @default(autoincrement())
+  inventoryId Int
+  batchId     Int?
+
+  inventory   inventory @relation(fields: [inventoryId], references: [id])
+  batch       batches?   @relation(fields: [batchId], references: [id])
+  quantity    Int
+}
+
+model billing{
+    id            Int     @id @default(autoincrement())
+    shopkeeperId  Int
+    shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
+
+
+    amount        Float
+    paymentMethod String
+    invoice       String?
+    invoiceDate   DateTime @db.Date
+    
+
+    billItem billItem[]
+
+    customer customer? @relation(fields: [customerId], references: [id])
+    customerId Int?
+}
+model billItem{
+    id            Int     @id @default(autoincrement())
+    billingId     Int
+    billing       billing @relation(fields: [billingId], references: [id])
+    
+    shopitemId Int
+    shopitem     shopItem @relation(fields: [shopitemId], references: [id])
+   
+    quantity      Int
+    price         Float
+    totalPrice    Float @default(0)
+}
+
+// CUSTOMER
+model customer{
+    id            Int     @id @default(autoincrement())
+    name          String
+    mobile String @unique
+    tier         String @default("Bronze")
+
+    billing billing[]
+}
+enum orderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  REJECTED
+  APPROVED
+}
+
+
+
+
+
+
+
+
+// model LowStockItem {
+//   id           Int    @id @default(autoincrement())
+//   name         String
+//   currentStock Int
+//   minStock     Int
+// }
+
+// model DailySalesData {
+//   id           Int    @id @default(autoincrement())
+//   day          String
+//   sales        Float
+//   transactions Int
+// }
+
+// model WeeklySalesData {
+//   id           Int    @id @default(autoincrement())
+//   week         String
+//   sales        Float
+//   transactions Int
+// }
+
+// model ProductPerformanceData {
+//   id    Int     @id @default(autoincrement())
+//   name  String
+//   value Float
+//   color String
+// }
+
+// model FastMovingProduct {
+//   id     Int    @id @default(autoincrement())
+//   name   String
+//   sales  Int
+//   growth Int
+// }
+
+// model SlowMovingProduct {
+//   id     Int    @id @default(autoincrement())
+//   name   String
+//   sales  Int
+//   growth Int
+// }
+
+// model RestockingSuggestion {
+//   id             Int    @id @default(autoincrement())
+//   name           String
+//   currentStock   Int
+//   suggestedStock Int
+//   priority       String
+// }
+
+// model RegionalDemandData {
+//   id     Int    @id @default(autoincrement())
+//   region String
+//   demand Int
+//   growth Int
+// }
+
+// model SalesForecastData {
+//   id      Int     @id @default(autoincrement())
+//   month   String
+//   actual  Float?
+//   forecast Float?
+// }
+
+// model HeatmapData {
+//   id     Int    @id @default(autoincrement())
+//   day    String
+//   field00to04 Int
+//   field04to08 Int
+//   field08to12 Int
+//   field12to16 Int
+//   field16to20 Int
+//   field20to24 Int
+// }
+
+// model Alert {
+//   id       Int    @id @default(autoincrement())
+//   type     String
+//   product  String
+//   message  String
+//   severity String
+// }
