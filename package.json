@@ -45,11 +45,12 @@
     "shadcn": "^2.4.1",
     "shadcn-ui": "^0.9.5",
     "superjson": "^2.2.1",
+    "tailwindcss-animate": "^1.0.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@tailwindcss/postcss": "^4.0.15",
+    "@tailwindcss/postcss": "^4.1.4",
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -59,7 +60,7 @@
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "prisma": "^6.5.0",
-    "tailwindcss": "^4.0.15",
+    "tailwindcss": "^4.1.4",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.27.0"
   },
