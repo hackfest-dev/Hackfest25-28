@@ -126,7 +126,8 @@ model shopItem {
   id            Int     @id @default(autoincrement())
   shopkeeperId  Int
   shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
-
+  name          String
+  brand         String
   inventoryId Int @unique
   inventory      inventory   @relation(fields: [inventoryId], references: [id])
 
