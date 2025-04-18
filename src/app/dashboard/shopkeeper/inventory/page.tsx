@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
+import { api } from "~/trpc/react"; 
 import {
   AlertCircle,
   ArrowUpDown,
@@ -184,6 +185,8 @@ export default function InventoryPage() {
     barcode: "",
   });
 
+    const fetchInventory = api.shopkeeper.getInventory;
+
   // Filter inventory based on search term, brand, and category
   const filteredInventory = inventory.filter(
     (item) =>
@@ -209,19 +212,18 @@ export default function InventoryPage() {
   });
 
   // Add new product
-  const handleAddProduct = () => {
-    const id = Math.max(...inventory.map((item) => item.id)) + 1;
-    setInventory([...inventory, { id, ...newProduct }]);
-    setShowAddDialog(false);
-    setNewProduct({
-      name: "",
-      brand: "",
-      category: "",
-      quantity: 0,
-      price: 0,
-      expiry: "",
-      barcode: "",
-    });
+  const handleAddProduct =async () => {
+    // const id = Math.max(...inventory.map((item) => item.id)) + 1;
+    // setInventory([...inventory, { id, ...newProduct }]);
+    // setShowAddDialog(false);
+    // setNewProduct({
+    //   name: "",
+
+    //   expiry: "",
+    //   barcode: "",
+    // });
+    console.log(fetchInventory.useQuery({id:1}))
+    
   };
 
   // Delete product
