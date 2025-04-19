@@ -50,6 +50,7 @@ import {
 } from "~/components/ui/popover";
 import { Calendar } from "~/components/ui/calendar";
 import { format } from "date-fns";
+import { api } from "~/trpc/react";
 
 // Sample product data
 const productDatabase = [
@@ -174,14 +175,16 @@ export default function BillingPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [customerName, setCustomerName] = useState("Walk-in Customer");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-
+  
+  const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
   // Filter products based on search term
-  const filteredProducts = productDatabase.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.barcode.includes(searchTerm),
-  );
+  const filteredProducts= fetchInventory.data
+  //  = productDatabase.filter(
+  //   (product) =>
+  //     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     product.barcode.includes(searchTerm),
+  // );
 
   // Add product to cart
   const addToCart = (product: (typeof productDatabase)[0]) => {
@@ -304,7 +307,7 @@ export default function BillingPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredProducts.length === 0 ? (
+                  {/* {filteredProducts.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={4}
@@ -335,7 +338,52 @@ export default function BillingPage() {
                         </TableCell>
                       </TableRow>
                     ))
-                  )}
+                  )} */}
+
+{filteredProducts && (
+  <div>
+    
+     
+
+      
+       <TableRow key={filteredProducts.id}>
+
+        
+      {filteredProducts.product && (
+        <div>
+         
+          <TableCell className="font-medium">
+                          {filteredProducts.product.name}
+                        </TableCell>
+          {/* <TableCell>{filteredProducts.product.manufacturerId}</TableCell> */}
+          <TableCell className="text-right">
+                          ${filteredProducts.product.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => addToCart()}
+                          >
+                            
+                            <Plus className="h-4 w-4" />
+                            <span className="sr-only">Add to cart</span>
+                          </Button>
+                        </TableCell>
+        </div>
+      )}
+                        
+                        
+                        
+                   
+         </TableRow>
+
+   
+
+      
+    </div>
+
+)}
                 </TableBody>
               </Table>
             </div>
