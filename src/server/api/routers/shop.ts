@@ -79,22 +79,17 @@ export const shopRouter = createTRPCRouter({
       brand: z.string(),
         shopkeeperId: z.number(),
         price: z.number(),
+        category: z.string(),
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const inventory = await ctx.db.inventory.create({
-        data:{
-          quantity: 0,
-        }
-      });
-      
       const shopItem = await ctx.db.shopItem.create({
         data: {
           name: input.name,
           brand: input.brand,
           shopkeeperId: input.shopkeeperId,
           price: input.price,
-          inventoryId: inventory.id,
+          category: input.category,
         },
       });
       return shopItem;
@@ -142,22 +137,22 @@ export const shopRouter = createTRPCRouter({
     }),
 
   // Inventory CRUD
-  createInventory: publicProcedure
-    .input(
-      z.object({
-        skuId: z.number().optional(),
-        quantity: z.number(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const inventory = await ctx.db.inventory.create({
-        data: {
-          skuId: input.skuId,
-          quantity: input.quantity,
-        },
-      });
-      return inventory;
-    }),
+  // createInventory: publicProcedure
+  //   .input(
+  //     z.object({
+  //       skuId: z.number().optional(),
+  //       quantity: z.number(),
+  //     })
+  //   )
+  //   .mutation(async ({ input, ctx }) => {
+  //     const inventory = await ctx.db.inventory.create({
+  //       data: {
+  //         skuId: input.skuId,
+  //         quantity: input.quantity,
+  //       },
+  //     });
+  //     return inventory;
+  //   }),
   getInventory: publicProcedure
     .input(z.object({ id: z.number() }))
     .query(async ({ input, ctx }) => {

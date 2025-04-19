@@ -2,7 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import type { shopItem } from "@prisma/client";
 
 import {
   AlertCircle,
@@ -65,6 +66,21 @@ import { api } from "~/trpc/react";
 
 
 // Sample inventory data
+
+interface shopItemType extends shopItem {
+  inventory?: {
+        id: number;
+        skuId: number | null;
+        quantity: number;
+  };
+  shopKeeper?: {
+    name: string;
+        id: number;
+        categories: string[];
+        rating: number;
+        deliveryTime: string;
+  };
+}
 
 const inventoryData = [
   {
@@ -175,6 +191,7 @@ const categories = [
 export default function InventoryPage() {
   const [inventory, setInventory] = useState(inventoryData);
   const [searchTerm, setSearchTerm] = useState("");
+  const [shopItems, setShopItems] = useState<shopItem[]>([]);
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -191,24 +208,34 @@ export default function InventoryPage() {
   });
 
   // const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
-  const getInventory = api.shopkeeper.getShopItems.useQuery({shopkeeperid:1})
+  const {data : getShopItems, refetch: fetchShopItems} = api.shopkeeper.getShopItems.useQuery({shopkeeperid:1})
+  const {mutate: addShopItem} = api.shopkeeper.createShopItem.useMutation();
   // const addProduct = api.shopkeeper.
     
 
   // Filter inventory based on search term, brand, and category
-  const filteredInventory = inventory.filter(
-    (item) =>
-      (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.barcode.includes(searchTerm)) &&
-      (selectedBrand === "All Brands" || item.brand === selectedBrand) &&
-      (selectedCategory === "All Categories" ||
-        item.category === selectedCategory),
-  );
+  const filteredInventory = getShopItems
+    ?.map((item2) => ({
+      id: item2.id,
+      name: item2.name,
+      brand: item2.brand,
+      price: item2.price,
+      category: item2.category,
+      quantity: item2.inventory?.quantity,
+      expiry: "",
+    }))
+    .filter(
+      (item) =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+        (((item.name ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ??
+          item.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        (selectedBrand === "All Brands" || item.brand === selectedBrand) &&
+        (selectedCategory === "All Categories" ||
+          item.category === selectedCategory)
+    ));
 
   // Get low stock items (quantity < 5)
   const lowStockItems = inventory.filter((item) => item.quantity < 5);
-  console.log(getInventory.data)
   // Get expired or soon to expire items (within 7 days)
   const today = new Date();
   const sevenDaysLater = new Date(today);
@@ -221,18 +248,35 @@ export default function InventoryPage() {
 
   // Add new product
   const handleAddProduct =async () => {
-    // const id = Math.max(...inventory.map((item) => item.id)) + 1;
-    // setInventory([...inventory, { id, ...newProduct }]);
-    // setShowAddDialog(false);
+    addShopItem({
+      name: newProduct.name,
+      brand: newProduct.brand,
+      category: newProduct.category,
+      price: newProduct.price,
+      shopkeeperId: 1
+    }, {onSuccess: () => {
+      fetchShopItems();
+      setShowAddDialog(false);
+      setNewProduct({
+        name: "",
+        brand: "",
+        category: "",
+        quantity: 0,
+        price: 0,
+        expiry: "",
+        barcode: "",
+      });
+    }});
+    }
+
+      // setShowAddDialog(false);
     // setNewProduct({
     //   name: "",
 
     //   expiry: "",
     //   barcode: "",
     // });
-    console.log(fetchInventory.data)
-    
-  };
+
   const handleAddInventory =async () => {
     // const id = Math.max(...inventory.map((item) => item.id)) + 1;
     // setInventory([...inventory, { id, ...newProduct }]);
@@ -243,7 +287,6 @@ export default function InventoryPage() {
     //   expiry: "",
     //   barcode: "",
     // });
-    console.log(fetchInventory.data)
     
   };
   // Delete product
@@ -398,7 +441,7 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* {filteredInventory.length === 0 ? (
+              {filteredInventory?.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={8}
@@ -408,8 +451,8 @@ export default function InventoryPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredInventory.map((item) => {
-                  const isLowStock = item.quantity < 5;
+                filteredInventory?.map((item) => {
+                  const isLowStock = (item?.quantity ?? 0) < 5;
                   const expiryDate = new Date(item.expiry);
                   const isExpired = expiryDate <= today;
                   const isExpiringSoon =
@@ -480,17 +523,16 @@ export default function InventoryPage() {
                     </TableRow>
                   );
                 })
-              )} */}
-              {getInventory.data?.length && <div>
+              )}
+              {/* {getInventory.data?.length && <div>
                  {JSON.stringify(getInventory.data)}
                 {/* {getInventory.data.map((item)=>{console.log(item)})} */}  
-                </div>}
             </TableBody>
           </Table>
         </CardContent>
         <CardFooter className="flex justify-between py-4">
           <div className="text-muted-foreground text-sm">
-            Showing {filteredInventory.length} of {inventory.length} products
+            Showing {filteredInventory?.length} of {shopItems.length} products
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
@@ -750,7 +792,7 @@ export default function InventoryPage() {
              <div className="max-h-64 overflow-y-auto border rounded-md">
     <table className="w-full text-sm">
       <TableBody>
-        {filteredInventory.length === 0 ? (
+        {filteredInventory?.length === 0 ? (
           <TableRow>
             <TableCell
               colSpan={8}
@@ -760,7 +802,7 @@ export default function InventoryPage() {
             </TableCell>
           </TableRow>
         ) : (
-          filteredInventory.map((item) => (
+          filteredInventory?.map((item) => (
             <TableRow key={item.id}>
               <TableCell className="font-medium">{item.name}</TableCell>
               <TableCell>{item.brand}</TableCell>
