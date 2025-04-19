@@ -537,15 +537,49 @@ export default function BillingPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Payment Method</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-           
+          <div className="p-4 space-y-4">
+  <h2 className="text-2xl font-bold mb-4">Bills</h2>
+  <div className="flex flex-col gap-4 p-4">
+  <div className="flex gap-60 items-center justify-between bg-gray-100 p-4 rounded-lg shadow-md">
+  <p><strong>Invoice:</strong> </p>
+          <p><strong>Amount:</strong></p>
+          <p><strong>Payment Method:</strong> </p>
+          <p><strong>Shopkeeper ID:</strong> </p>
+          <p><strong>Invoice Date:</strong></p>
+  </div>
+ 
+    {fetchBills.data?.length === 0 ? (
+      <p>No bills available.</p>
+    ) : (
+      fetchBills.data?.map((bill) => (
+        <div
+          key={bill.id}
+          className="bg-white shadow-md rounded-xl p-4 border border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          
+          <p> {bill.invoice}</p>
+          <p> ₹{bill.amount}</p>
+          <p>{bill.paymentMethod}</p>
+          <p> {bill.shopkeeperId}</p>
+          {bill.invoiceDate && (
+            <p>
+              {" "}
+              {new Date(bill.invoiceDate).toLocaleDateString("en-IN", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
+            </p>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+</div>
+
           </TableBody>
         </Table>
       </TabsContent>

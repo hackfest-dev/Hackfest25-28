@@ -232,3 +232,20 @@ enum orderStatus {
   REJECTED
   APPROVED
 }
+
+//   day    String
+//   field00to04 Int
+//   field04to08 Int
+//   field08to12 Int
+//   field12to16 Int
+//   field16to20 Int
+//   field20to24 Int
+// }
+
+// model Alert {
+//   id       Int    @id @default(autoincrement())
+//   type     String
+//   product  String
+//   message  String
+//   severity String
+// }
