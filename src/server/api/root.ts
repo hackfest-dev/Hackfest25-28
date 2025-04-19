@@ -6,6 +6,8 @@ import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { shopRouter } from "~/server/api/routers/shop" 
 import { dashboardRouter } from "~/server/api/routers/dashboard";
 import { manufacturerRouter } from "./routers/manufacturer";
+import { orderRouter } from "./routers/order";
+
 export const appRouter = createTRPCRouter({
   post: postRouter,
   // manufacturer: manufacturerRouter,
@@ -14,6 +16,7 @@ export const appRouter = createTRPCRouter({
   shopkeeper: shopRouter,
   manufacturer: manufacturerRouter,
   dashboard: dashboardRouter,
+  order: orderRouter,
 });
 
 // export type definition of API

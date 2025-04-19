@@ -93,7 +93,7 @@ export default function ShopkeeperDashboard() {
 
         {/* Manufacturers Module */}
         <Link
-          href="/dashboard/shopkeeper/manufacturers"
+          href="/dashboard/shopkeeper/manufacturer"
           className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-amber-200 hover:bg-amber-50/50 hover:shadow-md dark:hover:bg-amber-950/10"
         >
           <div className="flex flex-1 flex-col p-6">
