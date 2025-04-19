@@ -6,15 +6,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowUpDown,
-  BadgePercent,
-  CalendarIcon,
-  Download,
+  Check,
+  Clock,
   Filter,
-  Gift,
+  Package,
   Plus,
   Search,
-  Star,
-  Users,
+  ShoppingCart,
+  Truck,
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -22,12 +21,10 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import {
   Table,
   TableBody,
@@ -46,14 +43,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -61,1170 +50,993 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Badge } from "~/components/ui/badge";
-import { Avatar, AvatarFallback } from "~/components/ui/avatar";
-import { Progress } from "~/components/ui/progress";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
-import { Calendar as CalendarComponent } from "~/components/ui/calendar";
-import { format } from "date-fns";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
-// Sample customers data
-const customers = [
+// Sample manufacturers data
+const manufacturers = [
   {
     id: 1,
-    name: "John Smith",
-    email: "john.smith@example.com",
-    phone: "+1 (555) 123-4567",
-    joinDate: "2023-01-15",
-    points: 450,
-    tier: "Gold",
-    totalSpent: 1245.67,
-    visits: 12,
+    name: "FreshFoods Inc.",
+    logo: "/placeholder.svg?height=40&width=40",
+    categories: ["Dairy", "Produce", "Bakery"],
+    rating: 4.8,
+    deliveryTime: "1-2 days",
   },
   {
     id: 2,
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    phone: "+1 (555) 234-5678",
-    joinDate: "2023-02-20",
-    points: 280,
-    tier: "Silver",
-    totalSpent: 876.45,
-    visits: 8,
+    name: "Organic Harvest",
+    logo: "/placeholder.svg?height=40&width=40",
+    categories: ["Produce", "Grains", "Snacks"],
+    rating: 4.6,
+    deliveryTime: "2-3 days",
   },
   {
     id: 3,
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    phone: "+1 (555) 345-6789",
-    joinDate: "2023-01-05",
-    points: 620,
-    tier: "Platinum",
-    totalSpent: 2345.89,
-    visits: 18,
+    name: "Quality Beverages",
+    logo: "/placeholder.svg?height=40&width=40",
+    categories: ["Beverages", "Juices", "Water"],
+    rating: 4.5,
+    deliveryTime: "1-2 days",
   },
   {
     id: 4,
-    name: "Emily Davis",
-    email: "emily.d@example.com",
-    phone: "+1 (555) 456-7890",
-    joinDate: "2023-03-10",
-    points: 150,
-    tier: "Bronze",
-    totalSpent: 456.78,
-    visits: 5,
+    name: "Snack Masters",
+    logo: "/placeholder.svg?height=40&width=40",
+    categories: ["Snacks", "Confectionery", "Chips"],
+    rating: 4.7,
+    deliveryTime: "2-3 days",
   },
   {
     id: 5,
-    name: "David Wilson",
-    email: "david.w@example.com",
-    phone: "+1 (555) 567-8901",
-    joinDate: "2023-02-01",
-    points: 320,
-    tier: "Silver",
-    totalSpent: 987.65,
-    visits: 9,
+    name: "Clean Home Products",
+    logo: "/placeholder.svg?height=40&width=40",
+    categories: ["Household", "Cleaning", "Paper Goods"],
+    rating: 4.4,
+    deliveryTime: "3-4 days",
   },
 ];
 
-// Sample purchase history
-const purchaseHistory = [
+// Sample products data
+const products = [
   {
-    id: "INV-001",
-    customerId: 1,
+    id: 1,
+    manufacturerId: 1,
+    name: "Organic Whole Milk",
+    category: "Dairy",
+    price: 3.99,
+    unit: "1 Gallon",
+    minOrder: 10,
+    inStock: true,
+  },
+  {
+    id: 2,
+    manufacturerId: 1,
+    name: "Fresh Yogurt",
+    category: "Dairy",
+    price: 1.49,
+    unit: "8 oz",
+    minOrder: 24,
+    inStock: true,
+  },
+  {
+    id: 3,
+    manufacturerId: 1,
+    name: "Artisan Sourdough Bread",
+    category: "Bakery",
+    price: 4.99,
+    unit: "1 loaf",
+    minOrder: 12,
+    inStock: true,
+  },
+  {
+    id: 4,
+    manufacturerId: 1,
+    name: "Organic Apples",
+    category: "Produce",
+    price: 2.99,
+    unit: "1 lb",
+    minOrder: 20,
+    inStock: true,
+  },
+  {
+    id: 5,
+    manufacturerId: 2,
+    name: "Organic Carrots",
+    category: "Produce",
+    price: 1.99,
+    unit: "1 lb",
+    minOrder: 15,
+    inStock: true,
+  },
+  {
+    id: 6,
+    manufacturerId: 2,
+    name: "Quinoa",
+    category: "Grains",
+    price: 5.99,
+    unit: "1 lb",
+    minOrder: 10,
+    inStock: true,
+  },
+  {
+    id: 7,
+    manufacturerId: 2,
+    name: "Organic Trail Mix",
+    category: "Snacks",
+    price: 6.99,
+    unit: "12 oz",
+    minOrder: 12,
+    inStock: false,
+  },
+  {
+    id: 8,
+    manufacturerId: 3,
+    name: "Sparkling Water",
+    category: "Beverages",
+    price: 0.99,
+    unit: "12 oz",
+    minOrder: 24,
+    inStock: true,
+  },
+  {
+    id: 9,
+    manufacturerId: 3,
+    name: "Orange Juice",
+    category: "Juices",
+    price: 3.49,
+    unit: "64 oz",
+    minOrder: 12,
+    inStock: true,
+  },
+  {
+    id: 10,
+    manufacturerId: 3,
+    name: "Bottled Spring Water",
+    category: "Water",
+    price: 0.79,
+    unit: "16.9 oz",
+    minOrder: 36,
+    inStock: true,
+  },
+  {
+    id: 11,
+    manufacturerId: 4,
+    name: "Potato Chips",
+    category: "Chips",
+    price: 2.99,
+    unit: "8 oz",
+    minOrder: 24,
+    inStock: true,
+  },
+  {
+    id: 12,
+    manufacturerId: 4,
+    name: "Chocolate Bar",
+    category: "Confectionery",
+    price: 1.99,
+    unit: "3.5 oz",
+    minOrder: 36,
+    inStock: true,
+  },
+  {
+    id: 13,
+    manufacturerId: 5,
+    name: "All-Purpose Cleaner",
+    category: "Cleaning",
+    price: 3.99,
+    unit: "32 oz",
+    minOrder: 12,
+    inStock: true,
+  },
+  {
+    id: 14,
+    manufacturerId: 5,
+    name: "Paper Towels",
+    category: "Paper Goods",
+    price: 8.99,
+    unit: "8 rolls",
+    minOrder: 10,
+    inStock: true,
+  },
+];
+
+// Sample low stock items
+const lowStockItems = [
+  { id: 1, name: "Organic Milk", currentStock: 5, minStock: 20 },
+  { id: 2, name: "Whole Wheat Bread", currentStock: 8, minStock: 15 },
+  { id: 3, name: "Potato Chips", currentStock: 4, minStock: 25 },
+  { id: 4, name: "Sparkling Water", currentStock: 12, minStock: 30 },
+  { id: 5, name: "Paper Towels", currentStock: 6, minStock: 15 },
+];
+
+// Sample orders
+const orders = [
+  {
+    id: "ORD-001",
+    manufacturerId: 1,
+    manufacturerName: "FreshFoods Inc.",
     date: "2023-04-15",
-    items: 5,
-    total: 125.45,
-    pointsEarned: 12,
-  },
-  {
-    id: "INV-002",
-    customerId: 1,
-    date: "2023-04-02",
     items: 3,
-    total: 78.92,
-    pointsEarned: 7,
+    total: 245.67,
+    status: "shipped",
   },
   {
-    id: "INV-003",
-    customerId: 1,
-    date: "2023-03-20",
-    items: 7,
-    total: 156.78,
-    pointsEarned: 15,
-  },
-  {
-    id: "INV-004",
-    customerId: 2,
-    date: "2023-04-10",
-    items: 4,
-    total: 98.45,
-    pointsEarned: 9,
-  },
-  {
-    id: "INV-005",
-    customerId: 2,
-    date: "2023-03-25",
+    id: "ORD-002",
+    manufacturerId: 3,
+    manufacturerName: "Quality Beverages",
+    date: "2023-04-16",
     items: 2,
-    total: 45.67,
-    pointsEarned: 4,
+    total: 178.92,
+    status: "approved",
   },
   {
-    id: "INV-006",
-    customerId: 3,
+    id: "ORD-003",
+    manufacturerId: 2,
+    manufacturerName: "Organic Harvest",
+    date: "2023-04-17",
+    items: 4,
+    total: 312.45,
+    status: "pending",
+  },
+  {
+    id: "ORD-004",
+    manufacturerId: 5,
+    manufacturerName: "Clean Home Products",
     date: "2023-04-18",
-    items: 8,
-    total: 234.56,
-    pointsEarned: 23,
+    items: 2,
+    total: 156.78,
+    status: "shipped",
   },
   {
-    id: "INV-007",
-    customerId: 3,
-    date: "2023-04-05",
-    items: 6,
-    total: 178.9,
-    pointsEarned: 17,
-  },
-  {
-    id: "INV-008",
-    customerId: 4,
-    date: "2023-04-12",
+    id: "ORD-005",
+    manufacturerId: 4,
+    manufacturerName: "Snack Masters",
+    date: "2023-04-19",
     items: 3,
-    total: 67.89,
-    pointsEarned: 6,
-  },
-  {
-    id: "INV-009",
-    customerId: 5,
-    date: "2023-04-08",
-    items: 5,
-    total: 123.45,
-    pointsEarned: 12,
+    total: 198.34,
+    status: "pending",
   },
 ];
 
-// Sample rewards
-const rewards = [
-  {
-    id: 1,
-    name: "10% Off Next Purchase",
-    description: "Get 10% off your next purchase",
-    pointsCost: 100,
-    expiryDays: 30,
-  },
-  {
-    id: 2,
-    name: "Free Coffee",
-    description: "Enjoy a free coffee with your next purchase",
-    pointsCost: 50,
-    expiryDays: 15,
-  },
-  {
-    id: 3,
-    name: "$25 Gift Card",
-    description: "Redeem a $25 gift card",
-    pointsCost: 250,
-    expiryDays: 60,
-  },
-  {
-    id: 4,
-    name: "Free Delivery",
-    description: "Get free delivery on your next order",
-    pointsCost: 75,
-    expiryDays: 30,
-  },
-  {
-    id: 5,
-    name: "VIP Shopping Event",
-    description: "Exclusive access to our VIP shopping event",
-    pointsCost: 500,
-    expiryDays: 90,
-  },
-];
+type CartItem = {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  total: number;
+  manufacturerId: number;
+  manufacturerName: string;
+};
 
-export default function LoyaltyPage() {
+export default function ManufacturersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCustomer, setSelectedCustomer] = useState<number | null>(null);
-  const [showAddCustomerDialog, setShowAddCustomerDialog] = useState(false);
-  const [showAddPointsDialog, setShowAddPointsDialog] = useState(false);
-  const [date, setDate] = useState<Date>(new Date());
-  const [newCustomer, setNewCustomer] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
-  const [pointsToAdd, setPointsToAdd] = useState(0);
+  const [selectedManufacturer, setSelectedManufacturer] = useState<
+    number | null
+  >(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCartDialog, setShowCartDialog] = useState(false);
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("browse");
 
-  // Filter customers based on search term
-  const filteredCustomers = customers.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.phone.includes(searchTerm),
+  // Get all unique categories
+  const allCategories = Array.from(
+    new Set(products.map((product) => product.category)),
   );
 
-  // Get customer details
-  const customerDetails = selectedCustomer
-    ? customers.find((c) => c.id === selectedCustomer)
-    : null;
+  // Filter manufacturers based on search term
+  const filteredManufacturers = manufacturers.filter(
+    (manufacturer) =>
+      manufacturer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      manufacturer.categories.some((category) =>
+        category.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+  );
 
-  // Get customer purchase history
-  const customerPurchases = selectedCustomer
-    ? purchaseHistory.filter((p) => p.customerId === selectedCustomer)
-    : [];
+  // Filter products based on selected manufacturer and category
+  const filteredProducts = products.filter(
+    (product) =>
+      (selectedManufacturer === null ||
+        product.manufacturerId === selectedManufacturer) &&
+      (selectedCategory === null || product.category === selectedCategory) &&
+      (searchTerm === "" ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
 
-  // Get tier badge
-  const getTierBadge = (tier: string) => {
-    switch (tier) {
-      case "Bronze":
-        return (
-          <Badge
-            variant="outline"
-            className="border-amber-300 bg-amber-100 text-amber-800"
-          >
-            Bronze
-          </Badge>
+  // Add product to cart
+  const addToCart = (product: (typeof products)[0]) => {
+    const manufacturer = manufacturers.find(
+      (m) => m.id === product.manufacturerId,
+    );
+    if (!manufacturer) return;
+
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id
+            ? {
+                ...item,
+                quantity: item.quantity + 1,
+                total: (item.quantity + 1) * item.price,
+              }
+            : item,
         );
-      case "Silver":
-        return (
-          <Badge
-            variant="outline"
-            className="border-slate-300 bg-slate-100 text-slate-800"
-          >
-            Silver
-          </Badge>
-        );
-      case "Gold":
+      } else {
+        return [
+          ...prevCart,
+          {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: product.minOrder,
+            total: product.minOrder * product.price,
+            manufacturerId: product.manufacturerId,
+            manufacturerName: manufacturer.name,
+          },
+        ];
+      }
+    });
+  };
+
+  // Remove product from cart
+  const removeFromCart = (id: number) => {
+    setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+  };
+
+  // Update product quantity
+  const updateQuantity = (id: number, quantity: number) => {
+    if (quantity < 1) return;
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id
+          ? { ...item, quantity, total: quantity * item.price }
+          : item,
+      ),
+    );
+  };
+
+  // Calculate total by manufacturer
+  const calculateTotalByManufacturer = (manufacturerId: number) => {
+    return cart
+      .filter((item) => item.manufacturerId === manufacturerId)
+      .reduce((sum, item) => sum + item.total, 0);
+  };
+
+  // Group cart items by manufacturer
+  const cartByManufacturer = cart.reduce(
+    (acc, item) => {
+      if (!acc[item.manufacturerId]) {
+        acc[item.manufacturerId] = {
+          manufacturerId: item.manufacturerId,
+          manufacturerName: item.manufacturerName,
+          items: [],
+        };
+      }
+      acc[item.manufacturerId].items.push(item);
+      return acc;
+    },
+    {} as Record<
+      number,
+      { manufacturerId: number; manufacturerName: string; items: CartItem[] }
+    >,
+  );
+
+  // Place order
+  const placeOrder = () => {
+    // In a real app, this would send the order to the backend
+    setShowCartDialog(false);
+    setCart([]);
+    // Show success message or redirect
+  };
+
+  // Get status badge
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
         return (
           <Badge
             variant="outline"
             className="border-yellow-300 bg-yellow-100 text-yellow-800"
           >
-            Gold
+            Pending
           </Badge>
         );
-      case "Platinum":
+      case "approved":
         return (
           <Badge
             variant="outline"
-            className="border-emerald-300 bg-emerald-100 text-emerald-800"
+            className="border-blue-300 bg-blue-100 text-blue-800"
           >
-            Platinum
+            Approved
+          </Badge>
+        );
+      case "shipped":
+        return (
+          <Badge
+            variant="outline"
+            className="border-green-300 bg-green-100 text-green-800"
+          >
+            Shipped
           </Badge>
         );
       default:
-        return <Badge variant="outline">{tier}</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
-  };
-
-  // Add new customer
-  const handleAddCustomer = () => {
-    // In a real app, this would add the customer to the database
-    setShowAddCustomerDialog(false);
-    setNewCustomer({
-      name: "",
-      email: "",
-      phone: "",
-    });
-    // Show success message or redirect
-  };
-
-  // Add points to customer
-  const handleAddPoints = () => {
-    // In a real app, this would update the customer's points in the database
-    setShowAddPointsDialog(false);
-    setPointsToAdd(0);
-    // Show success message or redirect
   };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Loyalty Program</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Manufacturers</h1>
         <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                {format(date, "PPP")}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <CalendarComponent
-                mode="single"
-                selected={date}
-                onSelect={(date: React.SetStateAction<Date>) => date && setDate(date)}
-                initialFocus
-                required
-              />
-            </PopoverContent>
-          </Popover>
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700"
-            onClick={() => setShowAddCustomerDialog(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => setShowOrderDialog(true)}
           >
-            <Plus className="mr-2 h-4 w-4" /> Add Customer
+            <ShoppingCart className="h-4 w-4" />
+            Order Low Stock Items
           </Button>
+          {cart.length > 0 && (
+            <Button
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => setShowCartDialog(true)}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              View Cart ({cart.length})
+            </Button>
+          )}
         </div>
       </div>
 
-      <Tabs defaultValue="customers" className="w-full">
+      <Tabs
+        defaultValue={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
         <TabsList>
-          <TabsTrigger value="customers" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Customers
+          <TabsTrigger value="browse" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            Browse Manufacturers
           </TabsTrigger>
-          <TabsTrigger value="rewards" className="flex items-center gap-2">
-            <Gift className="h-4 w-4" />
-            Rewards
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BadgePercent className="h-4 w-4" />
-            Program Analytics
+          <TabsTrigger value="orders" className="flex items-center gap-2">
+            <Truck className="h-4 w-4" />
+            My Orders
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="customers" className="space-y-4">
-          {selectedCustomer === null ? (
-            <>
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle>Loyalty Customers</CardTitle>
-                  <CardDescription>
-                    Manage your loyalty program members
-                  </CardDescription>
-                  <div className="mt-4 flex flex-col gap-4 sm:flex-row">
-                    <div className="relative flex-1">
-                      <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                      <Input
-                        type="search"
-                        placeholder="Search customers by name, email, or phone..."
-                        className="pl-8"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Select defaultValue="all">
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="All Tiers" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Tiers</SelectItem>
-                          <SelectItem value="bronze">Bronze</SelectItem>
-                          <SelectItem value="silver">Silver</SelectItem>
-                          <SelectItem value="gold">Gold</SelectItem>
-                          <SelectItem value="platinum">Platinum</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button variant="outline" size="icon">
-                        <Filter className="h-4 w-4" />
-                        <span className="sr-only">Filter</span>
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>
-                          <div className="flex items-center gap-1">
-                            Customer
-                            <ArrowUpDown className="h-3 w-3" />
-                          </div>
-                        </TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Join Date</TableHead>
-                        <TableHead className="text-right">Points</TableHead>
-                        <TableHead>Tier</TableHead>
-                        <TableHead className="text-right">
-                          Total Spent
-                        </TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCustomers.length === 0 ? (
-                        <TableRow>
-                          <TableCell
-                            colSpan={7}
-                            className="text-muted-foreground py-4 text-center"
-                          >
-                            No customers found. Try a different search term or
-                            filter.
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        filteredCustomers.map((customer) => (
-                          <TableRow key={customer.id}>
-                            <TableCell className="font-medium">
-                              {customer.name}
-                            </TableCell>
-                            <TableCell>
-                              <div className="text-sm">{customer.email}</div>
-                              <div className="text-muted-foreground text-xs">
-                                {customer.phone}
-                              </div>
-                            </TableCell>
-                            <TableCell>{customer.joinDate}</TableCell>
-                            <TableCell className="text-right font-semibold">
-                              {customer.points}
-                            </TableCell>
-                            <TableCell>{getTierBadge(customer.tier)}</TableCell>
-                            <TableCell className="text-right">
-                              ${customer.totalSpent.toFixed(2)}
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="mr-2"
-                                onClick={() => setSelectedCustomer(customer.id)}
-                              >
-                                View
-                              </Button>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8"
-                                  >
-                                    <MoreVertical className="h-4 w-4" />
-                                    <span className="sr-only">More</span>
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() => {
-                                      setSelectedCustomer(customer.id);
-                                      setShowAddPointsDialog(true);
-                                    }}
-                                  >
-                                    Add Points
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    Edit Customer
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-destructive">
-                                    Delete Customer
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-                <CardFooter className="flex justify-between py-4">
-                  <div className="text-muted-foreground text-sm">
-                    Showing {filteredCustomers.length} of {customers.length}{" "}
-                    customers
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" /> Export
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
+        <TabsContent value="browse" className="space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle>Find Products</CardTitle>
+              <CardDescription>
+                Browse products from our trusted manufacturers
+              </CardDescription>
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row">
+                <div className="relative flex-1">
+                  <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                  <Input
+                    type="search"
+                    placeholder="Search manufacturers or products..."
+                    className="pl-8"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedCategory ? selectedCategory : "all"}
+                    onValueChange={(value) =>
+                      setSelectedCategory(value === "all" ? null : value)
+                    }
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="All Categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {allCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      setSelectedManufacturer(null);
+                      setSelectedCategory(null);
+                      setSearchTerm("");
+                    }}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="sr-only">Reset Filters</span>
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
 
-              {/* Tier Overview */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Loyalty Tier Overview</CardTitle>
-                  <CardDescription>
-                    Distribution of customers across loyalty tiers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100">
-                            <Star className="h-5 w-5 text-amber-600" />
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground text-sm font-medium">
-                              Bronze
-                            </div>
-                            <div className="text-2xl font-bold">1</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100">
-                            <Star className="h-5 w-5 text-slate-600" />
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground text-sm font-medium">
-                              Silver
-                            </div>
-                            <div className="text-2xl font-bold">2</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-yellow-100">
-                            <Star className="h-5 w-5 text-yellow-600" />
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground text-sm font-medium">
-                              Gold
-                            </div>
-                            <div className="text-2xl font-bold">1</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100">
-                            <Star className="h-5 w-5 text-emerald-600" />
-                          </div>
-                          <div>
-                            <div className="text-muted-foreground text-sm font-medium">
-                              Platinum
-                            </div>
-                            <div className="text-2xl font-bold">1</div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
-            </>
-          ) : (
-            <>
-              {/* Customer Details */}
-              {customerDetails && (
-                <>
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedCustomer(null)}
+          {/* Manufacturers List */}
+          {selectedManufacturer === null && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Manufacturers</CardTitle>
+                <CardDescription>
+                  Select a manufacturer to view their products
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="grid gap-4 p-6 sm:grid-cols-2 md:grid-cols-3">
+                  {filteredManufacturers.map((manufacturer) => (
+                    <Card
+                      key={manufacturer.id}
+                      className="hover:bg-accent/50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedManufacturer(manufacturer.id)}
                     >
-                      ← Back to Customers
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setShowAddPointsDialog(true);
-                      }}
-                    >
-                      Add Points
-                    </Button>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <Avatar className="h-16 w-16">
-                            <AvatarFallback className="text-lg">
-                              {customerDetails.name.substring(0, 2)}
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage
+                              src={manufacturer.logo || "/placeholder.svg"}
+                              alt={manufacturer.name}
+                            />
+                            <AvatarFallback>
+                              {manufacturer.name.substring(0, 2)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <CardTitle>{customerDetails.name}</CardTitle>
-                            <CardDescription>
-                              Member since {customerDetails.joinDate}
-                            </CardDescription>
-                          </div>
-                        </div>
-                        <div>{getTierBadge(customerDetails.tier)}</div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="space-y-1">
-                          <div className="text-muted-foreground text-sm font-medium">
-                            Email
-                          </div>
-                          <div>{customerDetails.email}</div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="text-muted-foreground text-sm font-medium">
-                            Phone
-                          </div>
-                          <div>{customerDetails.phone}</div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="text-muted-foreground text-sm font-medium">
-                            Total Spent
-                          </div>
-                          <div className="font-bold">
-                            ${customerDetails.totalSpent.toFixed(2)}
-                          </div>
-                        </div>
-                        <div className="space-y-1">
-                          <div className="text-muted-foreground text-sm font-medium">
-                            Store Visits
-                          </div>
-                          <div className="font-bold">
-                            {customerDetails.visits}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-6">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
-                            <div className="text-sm font-medium">
-                              Loyalty Points
+                            <h3 className="font-semibold">
+                              {manufacturer.name}
+                            </h3>
+                            <div className="text-muted-foreground flex items-center text-sm">
+                              <span className="flex items-center">
+                                ★ {manufacturer.rating}
+                              </span>
+                              <span className="mx-2">•</span>
+                              <span>{manufacturer.deliveryTime}</span>
                             </div>
-                            <div className="text-3xl font-bold">
-                              {customerDetails.points}
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {manufacturer.categories.map((category) => (
+                                <Badge
+                                  key={category}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {category}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
-                          <div className="text-muted-foreground text-sm">
-                            {customerDetails.tier === "Bronze" &&
-                              "150 points to Silver"}
-                            {customerDetails.tier === "Silver" &&
-                              "220 points to Gold"}
-                            {customerDetails.tier === "Gold" &&
-                              "380 points to Platinum"}
-                            {customerDetails.tier === "Platinum" &&
-                              "Maximum tier reached"}
-                          </div>
                         </div>
-                        <div className="mt-2">
-                          <Progress
-                            value={
-                              customerDetails.tier === "Bronze"
-                                ? (customerDetails.points / 300) * 100
-                                : customerDetails.tier === "Silver"
-                                  ? (customerDetails.points / 500) * 100
-                                  : customerDetails.tier === "Gold"
-                                    ? (customerDetails.points / 1000) * 100
-                                    : 100
-                            }
-                            className="h-2"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-                  {/* Purchase History */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Purchase History</CardTitle>
-                      <CardDescription>
-                        View customer's purchase history and points earned
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Invoice</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead className="text-right">Items</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                            <TableHead className="text-right">
-                              Points Earned
-                            </TableHead>
-                            <TableHead className="text-right">
-                              Actions
-                            </TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {customerPurchases.length === 0 ? (
-                            <TableRow>
-                              <TableCell
-                                colSpan={6}
-                                className="text-muted-foreground py-4 text-center"
+          {/* Products List */}
+          {(selectedManufacturer !== null ||
+            selectedCategory !== null ||
+            searchTerm !== "") && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Products</CardTitle>
+                  <CardDescription>
+                    {selectedManufacturer !== null
+                      ? `Products from ${manufacturers.find((m) => m.id === selectedManufacturer)?.name}`
+                      : "All products"}
+                  </CardDescription>
+                </div>
+                {selectedManufacturer !== null && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedManufacturer(null)}
+                  >
+                    View All Manufacturers
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>
+                        <div className="flex items-center gap-1">
+                          Product
+                          <ArrowUpDown className="h-3 w-3" />
+                        </div>
+                      </TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Manufacturer</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Min. Order</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredProducts.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="text-muted-foreground py-4 text-center"
+                        >
+                          No products found. Try a different search term or
+                          filter.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredProducts.map((product) => {
+                        const manufacturer = manufacturers.find(
+                          (m) => m.id === product.manufacturerId,
+                        );
+                        return (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">
+                              {product.name}
+                            </TableCell>
+                            <TableCell>{product.category}</TableCell>
+                            <TableCell>{manufacturer?.name}</TableCell>
+                            <TableCell className="text-right">
+                              ${product.price.toFixed(2)} / {product.unit}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {product.minOrder} units
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex items-center gap-1"
+                                disabled={!product.inStock}
+                                onClick={() => addToCart(product)}
                               >
-                                No purchase history found for this customer.
-                              </TableCell>
-                            </TableRow>
-                          ) : (
-                            customerPurchases.map((purchase) => (
-                              <TableRow key={purchase.id}>
-                                <TableCell className="font-medium">
-                                  {purchase.id}
-                                </TableCell>
-                                <TableCell>{purchase.date}</TableCell>
-                                <TableCell className="text-right">
-                                  {purchase.items}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  ${purchase.total.toFixed(2)}
-                                </TableCell>
-                                <TableCell className="text-right font-semibold text-emerald-600">
-                                  +{purchase.pointsEarned}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <Button variant="outline" size="sm">
-                                    View Details
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))
-                          )}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-
-                  {/* Available Rewards */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Available Rewards</CardTitle>
-                      <CardDescription>
-                        Rewards this customer can redeem with their points
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        {rewards.map((reward) => (
-                          <Card key={reward.id}>
-                            <CardContent className="p-4">
-                              <div className="flex h-full flex-col">
-                                <div className="mb-2 flex items-center gap-2">
-                                  <Gift className="h-5 w-5 text-emerald-500" />
-                                  <h3 className="font-semibold">
-                                    {reward.name}
-                                  </h3>
-                                </div>
-                                <p className="text-muted-foreground mb-4 text-sm">
-                                  {reward.description}
-                                </p>
-                                <div className="mt-auto flex items-center justify-between">
-                                  <div className="font-semibold">
-                                    {reward.pointsCost} points
-                                  </div>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    disabled={
-                                      customerDetails.points < reward.pointsCost
-                                    }
-                                  >
-                                    Redeem
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-            </>
+                                <Plus className="h-3 w-3" />
+                                {product.inStock
+                                  ? "Add to Cart"
+                                  : "Out of Stock"}
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="rewards" className="space-y-4">
+        <TabsContent value="orders" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Loyalty Rewards</CardTitle>
+              <CardTitle>My Orders</CardTitle>
               <CardDescription>
-                Manage your loyalty program rewards
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {rewards.map((reward) => (
-                  <Card key={reward.id}>
-                    <CardContent className="p-4">
-                      <div className="flex h-full flex-col">
-                        <div className="mb-2 flex items-center gap-2">
-                          <Gift className="h-5 w-5 text-emerald-500" />
-                          <h3 className="font-semibold">{reward.name}</h3>
-                        </div>
-                        <p className="text-muted-foreground mb-2 text-sm">
-                          {reward.description}
-                        </p>
-                        <div className="mb-4 text-sm">
-                          <span className="font-medium">Expires:</span>{" "}
-                          {reward.expiryDays} days after redemption
-                        </div>
-                        <div className="mt-auto flex items-center justify-between">
-                          <div className="font-semibold">
-                            {reward.pointsCost} points
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <MoreVertical className="h-4 w-4" />
-                                <span className="sr-only">More</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Edit Reward</DropdownMenuItem>
-                              <DropdownMenuItem>
-                                View Redemptions
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive">
-                                Delete Reward
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-
-                {/* Add New Reward Card */}
-                <Card className="border-dashed">
-                  <CardContent className="hover:bg-accent/50 flex h-full min-h-[200px] cursor-pointer flex-col items-center justify-center p-4 transition-colors">
-                    <Plus className="text-muted-foreground mb-2 h-8 w-8" />
-                    <p className="font-medium">Add New Reward</p>
-                    <p className="text-muted-foreground text-sm">
-                      Create a new loyalty reward
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Reward Redemption History */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Redemptions</CardTitle>
-              <CardDescription>
-                Track reward redemptions by your customers
+                Track and manage your orders from manufacturers
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Reward</TableHead>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Manufacturer</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Points Used</TableHead>
+                    <TableHead className="text-right">Items</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">John Smith</TableCell>
-                    <TableCell>10% Off Next Purchase</TableCell>
-                    <TableCell>2023-04-15</TableCell>
-                    <TableCell className="text-right">100</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-300 bg-emerald-100 text-emerald-800"
-                      >
-                        Redeemed
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Michael Brown</TableCell>
-                    <TableCell>Free Coffee</TableCell>
-                    <TableCell>2023-04-12</TableCell>
-                    <TableCell className="text-right">50</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-yellow-300 bg-yellow-100 text-yellow-800"
-                      >
-                        Pending
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Sarah Johnson</TableCell>
-                    <TableCell>$25 Gift Card</TableCell>
-                    <TableCell>2023-04-10</TableCell>
-                    <TableCell className="text-right">250</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className="border-emerald-300 bg-emerald-100 text-emerald-800"
-                      >
-                        Redeemed
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
+                  {orders.map((order) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell>{order.manufacturerName}</TableCell>
+                      <TableCell>{order.date}</TableCell>
+                      <TableCell className="text-right">
+                        {order.items}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        ${order.total.toFixed(2)}
+                      </TableCell>
+                      <TableCell>{getStatusBadge(order.status)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
-        </TabsContent>
 
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-1">
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Total Members
-                  </p>
-                  <div className="text-3xl font-bold">5</div>
-                  <p className="text-xs text-emerald-500">+2 this month</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-1">
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Points Issued
-                  </p>
-                  <div className="text-3xl font-bold">1,820</div>
-                  <p className="text-xs text-emerald-500">+105 this month</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-1">
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Points Redeemed
-                  </p>
-                  <div className="text-3xl font-bold">400</div>
-                  <p className="text-xs text-emerald-500">+150 this month</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col gap-1">
-                  <p className="text-muted-foreground text-sm font-medium">
-                    Redemption Rate
-                  </p>
-                  <div className="text-3xl font-bold">22%</div>
-                  <p className="text-xs text-emerald-500">
-                    +5% from last month
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Program Performance */}
+          {/* Order Status Timeline */}
           <Card>
             <CardHeader>
-              <CardTitle>Program Performance</CardTitle>
+              <CardTitle>Order Status Timeline</CardTitle>
               <CardDescription>
-                Key metrics for your loyalty program
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted/20 text-muted-foreground flex h-[300px] w-full items-center justify-center rounded-md">
-                Loyalty Program Performance Chart Placeholder
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Customer Engagement */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Customer Engagement</CardTitle>
-              <CardDescription>
-                Loyalty program engagement metrics
+                Track the progress of your recent orders
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      Average Points per Customer
+                {orders.slice(0, 3).map((order) => (
+                  <div key={order.id} className="relative">
+                    <div className="flex items-center gap-4">
+                      <div className="flex-shrink-0">
+                        <Avatar>
+                          <AvatarFallback>
+                            {order.manufacturerName.substring(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                          <div>
+                            <h4 className="font-semibold">
+                              {order.id} - {order.manufacturerName}
+                            </h4>
+                            <p className="text-muted-foreground text-sm">
+                              {order.date}
+                            </p>
+                          </div>
+                          <div className="mt-2 sm:mt-0">
+                            {getStatusBadge(order.status)}
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <div className="relative">
+                            <div className="flex items-center justify-between">
+                              <div className="flex flex-col items-center">
+                                <div
+                                  className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                                    order.status === "pending" ||
+                                    order.status === "approved" ||
+                                    order.status === "shipped"
+                                      ? "bg-emerald-100 text-emerald-600"
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
+                                >
+                                  {order.status === "pending" ||
+                                  order.status === "approved" ||
+                                  order.status === "shipped" ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Clock className="h-4 w-4" />
+                                  )}
+                                </div>
+                                <span className="mt-1 text-xs">Ordered</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <div
+                                  className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                                    order.status === "approved" ||
+                                    order.status === "shipped"
+                                      ? "bg-emerald-100 text-emerald-600"
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
+                                >
+                                  {order.status === "approved" ||
+                                  order.status === "shipped" ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Clock className="h-4 w-4" />
+                                  )}
+                                </div>
+                                <span className="mt-1 text-xs">Approved</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <div
+                                  className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                                    order.status === "shipped"
+                                      ? "bg-emerald-100 text-emerald-600"
+                                      : "bg-muted text-muted-foreground"
+                                  }`}
+                                >
+                                  {order.status === "shipped" ? (
+                                    <Check className="h-4 w-4" />
+                                  ) : (
+                                    <Clock className="h-4 w-4" />
+                                  )}
+                                </div>
+                                <span className="mt-1 text-xs">Shipped</span>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full">
+                                  <Clock className="h-4 w-4" />
+                                </div>
+                                <span className="mt-1 text-xs">Delivered</span>
+                              </div>
+                            </div>
+                            <div className="bg-muted absolute top-4 right-0 left-0 h-0.5">
+                              <div
+                                className="h-full bg-emerald-500"
+                                style={{
+                                  width:
+                                    order.status === "pending"
+                                      ? "0%"
+                                      : order.status === "approved"
+                                        ? "33%"
+                                        : order.status === "shipped"
+                                          ? "66%"
+                                          : "100%",
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="font-bold">364</div>
                   </div>
-                  <Progress value={72} className="h-2" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      Repeat Purchase Rate
-                    </div>
-                    <div className="font-bold">68%</div>
-                  </div>
-                  <Progress value={68} className="h-2" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      Program Participation
-                    </div>
-                    <div className="font-bold">85%</div>
-                  </div>
-                  <Progress value={85} className="h-2" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium">
-                      Customer Retention
-                    </div>
-                    <div className="font-bold">92%</div>
-                  </div>
-                  <Progress value={92} className="h-2" />
-                </div>
+                ))}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Add Customer Dialog */}
-      <Dialog
-        open={showAddCustomerDialog}
-        onOpenChange={setShowAddCustomerDialog}
-      >
-        <DialogContent>
+      {/* Cart Dialog */}
+      <Dialog open={showCartDialog} onOpenChange={setShowCartDialog}>
+        <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Add New Customer</DialogTitle>
+            <DialogTitle>Your Cart</DialogTitle>
             <DialogDescription>
-              Add a new customer to your loyalty program
+              Review your items before placing an order
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                value={newCustomer.name}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, name: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newCustomer.email}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, email: e.target.value })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                value={newCustomer.phone}
-                onChange={(e) =>
-                  setNewCustomer({ ...newCustomer, phone: e.target.value })
-                }
-              />
-            </div>
+          <div className="max-h-[60vh] overflow-auto">
+            {Object.values(cartByManufacturer).map((manufacturerCart) => (
+              <div key={manufacturerCart.manufacturerId} className="mb-6">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">
+                    {manufacturerCart.manufacturerName}
+                  </h3>
+                  <div className="text-muted-foreground text-sm">
+                    Total: $
+                    {calculateTotalByManufacturer(
+                      manufacturerCart.manufacturerId,
+                    ).toFixed(2)}
+                  </div>
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Product</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                      <TableHead className="text-right">Quantity</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {manufacturerCart.items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">
+                          {item.name}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${item.price.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity - 1)
+                              }
+                            >
+                              <Minus className="h-3 w-3" />
+                              <span className="sr-only">Decrease</span>
+                            </Button>
+                            <span>{item.quantity}</span>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={() =>
+                                updateQuantity(item.id, item.quantity + 1)
+                              }
+                            >
+                              <Plus className="h-3 w-3" />
+                              <span className="sr-only">Increase</span>
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ${item.total.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-destructive h-6 w-6"
+                            onClick={() => removeFromCart(item.id)}
+                          >
+                            <X className="h-3 w-3" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ))}
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowAddCustomerDialog(false)}
-            >
-              Cancel
+            <Button variant="outline" onClick={() => setShowCartDialog(false)}>
+              Continue Shopping
             </Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleAddCustomer}
+              onClick={placeOrder}
             >
-              Add Customer
+              Place Order
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Add Points Dialog */}
-      <Dialog open={showAddPointsDialog} onOpenChange={setShowAddPointsDialog}>
+      {/* Order Low Stock Items Dialog */}
+      <Dialog open={showOrderDialog} onOpenChange={setShowOrderDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Points</DialogTitle>
+            <DialogTitle>Order Low Stock Items</DialogTitle>
             <DialogDescription>
-              Add loyalty points to {customerDetails?.name || "customer"}
+              Quickly restock items that are running low
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="points">Points to Add</Label>
-              <Input
-                id="points"
-                type="number"
-                value={pointsToAdd}
-                onChange={(e) => setPointsToAdd(Number(e.target.value))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="reason">Reason</Label>
-              <Select defaultValue="purchase">
-                <SelectTrigger id="reason">
-                  <SelectValue placeholder="Select Reason" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="purchase">Purchase</SelectItem>
-                  <SelectItem value="referral">Referral</SelectItem>
-                  <SelectItem value="birthday">Birthday Bonus</SelectItem>
-                  <SelectItem value="promotion">Promotion</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes (Optional)</Label>
-              <Input id="notes" />
-            </div>
+          <div className="max-h-[60vh] overflow-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead className="text-right">Current Stock</TableHead>
+                  <TableHead className="text-right">Min. Stock</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lowStockItems.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell className="text-right font-bold text-red-500">
+                      {item.currentStock}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {item.minStock}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="outline">
+                        Add to Order
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowAddPointsDialog(false)}
-            >
+            <Button variant="outline" onClick={() => setShowOrderDialog(false)}>
               Cancel
             </Button>
-            <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleAddPoints}
-            >
-              Add Points
+            <Button className="bg-emerald-600 hover:bg-emerald-700">
+              Create Order
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1233,7 +1045,7 @@ export default function LoyaltyPage() {
   );
 }
 
-function MoreVertical(props: React.SVGProps<SVGSVGElement>) {
+function Minus(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -1247,9 +1059,27 @@ function MoreVertical(props: React.SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="19" r="1" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function X(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
     </svg>
   );
 }
