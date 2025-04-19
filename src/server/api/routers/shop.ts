@@ -92,8 +92,17 @@ export const shopRouter = createTRPCRouter({
           category: input.category,
         },
       });
-      return shopItem;
-    }),
+      const inventory = await ctx.db.inventory.create({
+        data: {
+          quantity: 0,
+          shopItem: { 
+            connect:{
+              id: shopItem.id
+            }
+          }
+        }
+    })
+  }),
   getShopItems: publicProcedure
     .input(z.object({ shopkeeperid: z.number() }))
     .query(async ({ input, ctx }) => {
@@ -105,6 +114,9 @@ export const shopRouter = createTRPCRouter({
           billItem: true,
         }
       });
+      if(!shopItems) {
+        return null;
+      }
       return shopItems;
     }),
   // updateShopItem: publicProcedure
