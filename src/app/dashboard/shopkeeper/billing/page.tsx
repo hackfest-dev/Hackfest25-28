@@ -177,6 +177,19 @@ export default function BillingPage() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   
   const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  const createBill = api.shopkeeper.createBilling
+    .useMutation({
+      onSuccess: () => {
+        // Handle success (e.g., show a success message or redirect)
+        setCart([]);
+        setDiscount(0);
+        setCustomerName("Walk-in Customer");
+      },
+      onError: (error) => {
+        // Handle error (e.g., show an error message)
+        console.error("Error creating bill:", error);
+      },
+    });
   // Filter products based on search term
   const filteredProducts= fetchInventory.data
   //  = productDatabase.filter(
@@ -341,31 +354,39 @@ export default function BillingPage() {
                   )} */}
 
 {filteredProducts && (
-  <div>
-    
-     
 
+    <div>
+     
+       {/* {JSON.stringify(filteredProducts.shopItem)} */}
       
        <TableRow key={filteredProducts.id}>
-
         
-      {filteredProducts.product && (
+      {filteredProducts.shopItem && (
         <div>
          
           <TableCell className="font-medium">
-                          {filteredProducts.product.name}
+                          {filteredProducts.shopItem.name}
                         </TableCell>
+          <TableCell className="font-medium">
+            {filteredProducts.shopItem.brand}
+          </TableCell>
           {/* <TableCell>{filteredProducts.product.manufacturerId}</TableCell> */}
           <TableCell className="text-right">
-                          ${filteredProducts.product.price.toFixed(2)}
+                          ${filteredProducts.shopItem.price.toFixed(2)}
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => addToCart()}
+                            onClick={() => addToCart({
+                              id: filteredProducts.shopItem.id,
+                              name: filteredProducts.shopItem.name,
+                              price: filteredProducts.shopItem.price,
+                              brand: filteredProducts.shopItem.brand,
+                              category: filteredProducts.shopItem?.category ?? "Unknown",
+                              barcode: "8901234567890",
+                            })}
                           >
-                            
                             <Plus className="h-4 w-4" />
                             <span className="sr-only">Add to cart</span>
                           </Button>
@@ -499,13 +520,23 @@ export default function BillingPage() {
             </div>
           </CardContent>
           <CardFooter className="flex gap-2">
-            <Button
-              className="flex-1 bg-emerald-600 hover:bg-emerald-700"
-              disabled={cart.length === 0}
-              onClick={() => setShowPaymentDialog(true)}
-            >
-              <Receipt className="mr-2 h-4 w-4" /> Generate Bill
-            </Button>
+          <Button
+            className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+            disabled={cart.length === 0}
+            onClick={() => {
+              setShowPaymentDialog(true);
+              createBill.mutate({
+                shopkeeperId: 1, // Replace with the correct shopkeeperId
+                amount: total,
+                paymentMethod: "Cash", // Replace with the selected payment method
+                invoice: `INV-${Date.now()}`, // Generate unique invoice number
+                invoiceDate: new Date(), // Current date
+                // customerId: customerName === "Walk-in Customer" ? null : 123, // Replace "123" with the correct customer ID if applicable
+              });
+            }}
+          >
+            <Receipt className="mr-2 h-4 w-4" /> Generate Bill
+          </Button>
             <Button
               variant="outline"
               className="flex-1"
