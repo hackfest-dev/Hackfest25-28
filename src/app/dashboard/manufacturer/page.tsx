@@ -6,7 +6,17 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { BarChart, LineChart, PieChart } from "lucide-react";
+import {
+  BarChart,
+  LineChart,
+  PieChart,
+  LayoutDashboard,
+  Package,
+  ClipboardList,
+  BarChart3,
+} from "lucide-react";
+import { Button } from "~/components/ui/button";
+import Link from "next/link";
 
 export default function ManufacturerDashboard() {
   return (
@@ -18,6 +28,46 @@ export default function ManufacturerDashboard() {
         Welcome back! Here's an overview of your products' performance across
         retailers.
       </p>
+
+      {/* Navigation Buttons */}
+      <div className="mb-2 flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer"
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/analytics"
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Analytics</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/orders"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Orders</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/inventory"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Inventory</span>
+          </Link>
+        </Button>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
