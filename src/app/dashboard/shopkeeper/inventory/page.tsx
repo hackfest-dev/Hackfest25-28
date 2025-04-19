@@ -185,7 +185,9 @@ export default function InventoryPage() {
     barcode: "",
   });
 
-    const fetchInventory = api.shopkeeper.getInventory;
+  const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  // const addProduct = api.shopkeeper.
+    
 
   // Filter inventory based on search term, brand, and category
   const filteredInventory = inventory.filter(
@@ -222,10 +224,22 @@ export default function InventoryPage() {
     //   expiry: "",
     //   barcode: "",
     // });
-    console.log(fetchInventory.useQuery({id:1}))
+    console.log(fetchInventory.data)
     
   };
+  const handleAddInventory =async () => {
+    // const id = Math.max(...inventory.map((item) => item.id)) + 1;
+    // setInventory([...inventory, { id, ...newProduct }]);
+    // setShowAddDialog(false);
+    // setNewProduct({
+    //   name: "",
 
+    //   expiry: "",
+    //   barcode: "",
+    // });
+    console.log(fetchInventory.data)
+    
+  };
   // Delete product
   const handleDeleteProduct = (id: number) => {
     setInventory(inventory.filter((item) => item.id !== id));
@@ -260,6 +274,12 @@ export default function InventoryPage() {
           >
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
+          <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAddInventory}
+            >
+            <Plus className="mr-2 h-4 w-4" />  Add Items to Inventory
+            </Button>
         </div>
       </div>
 
@@ -389,17 +409,7 @@ export default function InventoryPage() {
                       <TableCell>{item.category}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity - 1)
-                            }
-                          >
-                            <Minus className="h-3 w-3" />
-                            <span className="sr-only">Decrease</span>
-                          </Button>
+                          
                           <span
                             className={
                               isLowStock ? "font-bold text-red-500" : ""
@@ -407,21 +417,11 @@ export default function InventoryPage() {
                           >
                             {item.quantity}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity + 1)
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                            <span className="sr-only">Increase</span>
-                          </Button>
+                          
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                       </TableCell>
                       <TableCell>{item.expiry}</TableCell>
                       <TableCell>
@@ -675,20 +675,7 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={newProduct.quantity}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      quantity: Number(e.target.value),
-                    })
-                  }
-                />
-              </div>
+           
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -706,34 +693,9 @@ export default function InventoryPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  type="date"
-                  value={newProduct.expiry}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, expiry: e.target.value })
-                  }
-                />
-              </div>
+              
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="barcode">Barcode</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="barcode"
-                  value={newProduct.barcode}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, barcode: e.target.value })
-                  }
-                />
-                <Button variant="outline" size="icon">
-                  <BarcodeScan className="h-4 w-4" />
-                  <span className="sr-only">Scan Barcode</span>
-                </Button>
-              </div>
-            </div>
+           
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
@@ -745,9 +707,12 @@ export default function InventoryPage() {
             >
               Add Product
             </Button>
+            
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      
     </div>
   );
 }
