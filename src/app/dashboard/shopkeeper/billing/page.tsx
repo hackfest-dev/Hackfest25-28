@@ -175,6 +175,7 @@ export default function BillingPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [customerName, setCustomerName] = useState("Walk-in Customer");
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [quantityFinal, setQuantity] = useState(0);
   
   const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
   const createBill = api.shopkeeper.createBilling
@@ -320,38 +321,7 @@ export default function BillingPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* {filteredProducts.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        className="text-muted-foreground py-4 text-center"
-                      >
-                        No products found. Try a different search term.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">
-                          {product.name}
-                        </TableCell>
-                        <TableCell>{product.brand}</TableCell>
-                        <TableCell className="text-right">
-                          ${product.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => addToCart(product)}
-                          >
-                            <Plus className="h-4 w-4" />
-                            <span className="sr-only">Add to cart</span>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )} */}
+                  
 
 {filteredProducts && (
 
@@ -530,8 +500,8 @@ export default function BillingPage() {
                 amount: total,
                 paymentMethod: "Cash", // Replace with the selected payment method
                 invoice: `INV-${Date.now()}`, // Generate unique invoice number
-                invoiceDate: new Date(), // Current date
-                // customerId: customerName === "Walk-in Customer" ? null : 123, // Replace "123" with the correct customer ID if applicable
+                invoiceDate: new Date(),
+                quantity: 0
               });
             }}
           >
