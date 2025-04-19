@@ -177,7 +177,7 @@ export default function BillingPage() {
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const [quantityFinal, setQuantity] = useState(0);
   
-  const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  const fetchInventory = api.shopkeeper.getInventory.useQuery({ shopkeeper: 1 });
   const createBill = api.shopkeeper.createBilling
     .useMutation({
       onSuccess: () => {
@@ -323,57 +323,53 @@ export default function BillingPage() {
                 <TableBody>
                   
 
-{filteredProducts && (
-
-    <div>
-     
-       {/* {JSON.stringify(filteredProducts.shopItem)} */}
-      
-       <TableRow key={filteredProducts.id}>
-        
-      {filteredProducts.shopItem && (
-        <div>
-         
+                {filteredProducts && filteredProducts.length > 0 ? (
+  filteredProducts.map((product) => (
+    <TableRow key={product.id}>
+      {product.shopItem ? (
+        <>
           <TableCell className="font-medium">
-                          {filteredProducts.shopItem.name}
-                        </TableCell>
-          <TableCell className="font-medium">
-            {filteredProducts.shopItem.brand}
+            {product.shopItem.name}
           </TableCell>
-          {/* <TableCell>{filteredProducts.product.manufacturerId}</TableCell> */}
+          <TableCell className="font-medium">
+            {product.shopItem .brand}
+          </TableCell>
           <TableCell className="text-right">
-                          ${filteredProducts.shopItem.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => addToCart({
-                              id: filteredProducts.shopItem.id,
-                              name: filteredProducts.shopItem.name,
-                              price: filteredProducts.shopItem.price,
-                              brand: filteredProducts.shopItem.brand,
-                              category: filteredProducts.shopItem?.category ?? "Unknown",
-                              barcode: "8901234567890",
-                            })}
-                          >
-                            <Plus className="h-4 w-4" />
-                            <span className="sr-only">Add to cart</span>
-                          </Button>
-                        </TableCell>
-        </div>
+            ${product.shopItem.price.toFixed(2)}
+          </TableCell>
+          <TableCell className="text-right">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() =>
+                addToCart({
+                  id: product.shopItem.id,
+                  name: product.shopItem.name,
+                  price: product.shopItem.price,
+                  brand: product.shopItem.brand,
+                  category: product.shopItem?.category ?? "Unknown",
+                  barcode: "8901234567890",
+                })
+              }
+            >
+              <Plus className="h-4 w-4" />
+              <span className="sr-only">Add to cart</span>
+            </Button>
+          </TableCell>
+        </>
+      ) : (
+        <TableCell colSpan={4} className="text-center">
+          No shop item details available
+        </TableCell>
       )}
-                        
-                        
-                        
-                   
-         </TableRow>
-
-   
-
-      
-    </div>
-
+    </TableRow>
+  ))
+) : (
+  <TableRow>
+    <TableCell colSpan={4} className="text-muted-foreground py-4 text-center">
+      No products found. Try a different search term.
+    </TableCell>
+  </TableRow>
 )}
                 </TableBody>
               </Table>

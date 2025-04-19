@@ -4,6 +4,7 @@ import {
   publicProcedure,
   protectedProcedure,
 } from "../trpc";
+import { id } from "date-fns/locale";
 
 export const shopRouter = createTRPCRouter({
   // Shopkeeper CRUD
@@ -174,17 +175,27 @@ export const shopRouter = createTRPCRouter({
   //     return inventory;
   //   }),
   getInventory: publicProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({shopkeeper:z.number() }))
     .query(async ({ input, ctx }) => {
-      const inventory = await ctx.db.inventory.findUnique({
-        where: { id: input.id },
+
+      const shopItems = await ctx.db.shopItem.findMany({
+        where: { shopkeeperId: input.shopkeeper },})
+
+      if (!shopItems) {
+        return null;
+      }
+      const inventories = await ctx.db.inventory.findMany({
+        where: { shopItemId: { in: shopItems.map((item) => item.id) } },
         include: {
           product: true,
           shopItem: true,
           inventoryBatches: true,
         },
       });
-      return inventory;
+      
+      
+    
+      return inventories;
     }),
   updateInventory: publicProcedure
     .input(
