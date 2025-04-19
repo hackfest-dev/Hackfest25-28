@@ -20,7 +20,7 @@ import Link from "next/link";
 import { api } from "~/trpc/react";
 
 export default function ManufacturerDashboard() {
-  // const dat = api.dashboard.getManufacturerTotalRevenue.useQuery({
+  // const dat = api.dashboard.getManufacturerTotalRevenue.useQuery({ 
   //   manufacturerId: 1,
   // });
   return (

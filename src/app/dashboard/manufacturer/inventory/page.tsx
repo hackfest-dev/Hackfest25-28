@@ -45,6 +45,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
 import Link from "next/link"
+import { api } from "~/trpc/react"
 
 // Sample inventory data
 const inventoryData = [
@@ -178,6 +179,8 @@ const batches = [
 export default function ManufacturerInventoryPage() {
   const [inventory, setInventory] = useState(inventoryData);
   const [searchTerm, setSearchTerm] = useState("");
+  
+  const {mutate: addSku} = api.manufacturer.addSku.useMutation();
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [selectedBatch, setSelectedBatch] = useState("All Batches");
@@ -186,12 +189,8 @@ export default function ManufacturerInventoryPage() {
     sku: "",
     name: "",
     category: "",
-    batchNumber: "",
-    quantity: 0,
     price: 0,
-    manufactureDate: "",
-    expiryDate: "",
-    location: "",
+    minorder: 0,
   });
 
   // Filter inventory based on search term, category, location, and batch
@@ -222,21 +221,28 @@ export default function ManufacturerInventoryPage() {
 
   // Add new product
   const handleAddProduct = () => {
-    const id = Math.max(...inventory.map((item) => item.id)) + 1;
-    setInventory([...inventory, { id, ...newProduct }]);
-    setShowAddDialog(false);
+    addSku({
+      skuId: newProduct.sku,
+      prodName: newProduct.name,
+      category: newProduct.category,
+      minorder: newProduct.minorder,
+      price: newProduct.price,
+      maid: 1
+    }, {
+      onSuccess:{
+        void getSkus();
+      }
+    });
+    
+    setShowAddDialog(false)
     setNewProduct({
       sku: "",
       name: "",
       category: "",
-      batchNumber: "",
-      quantity: 0,
       price: 0,
-      manufactureDate: "",
-      expiryDate: "",
-      location: "",
-    });
-  };
+      minorder: 0,
+    })
+  }
 
   // Delete product
   const handleDeleteProduct = (id: number) => {
@@ -842,7 +848,7 @@ export default function ManufacturerInventoryPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
@@ -863,35 +869,10 @@ export default function ManufacturerInventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="batchNumber">Batch Number</Label>
-                <Input
-                  id="batchNumber"
-                  value={newProduct.batchNumber}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      batchNumber: e.target.value,
-                    })
-                  }
-                />
-              </div>
+             
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={newProduct.quantity}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      quantity: Number(e.target.value),
-                    })
-                  }
-                />
-              </div>
+             
               <div className="space-y-2">
                 <Label htmlFor="price">Price ($)</Label>
                 <Input
@@ -907,35 +888,19 @@ export default function ManufacturerInventoryPage() {
                   }
                 />
               </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="manufactureDate">Manufacture Date</Label>
+                <Label htmlFor="minorder">Min Order</Label>
                 <Input
-                  id="manufactureDate"
-                  type="date"
-                  value={newProduct.manufactureDate}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      manufactureDate: e.target.value,
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date</Label>
-                <Input
-                  id="expiryDate"
-                  type="date"
-                  value={newProduct.expiryDate}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, expiryDate: e.target.value })
-                  }
+                  id="minorder"
+                  type="number"
+                  step="1"
+                  value={newProduct.minorder}
+                  onChange={(e) => setNewProduct({ ...newProduct, minorder: Number(e.target.value) })}
                 />
               </div>
             </div>
-            <div className="space-y-2">
+           
+            {/* <div className="space-y-2">
               <Label htmlFor="location">Location</Label>
               <Select
                 value={newProduct.location}
@@ -954,7 +919,7 @@ export default function ManufacturerInventoryPage() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
