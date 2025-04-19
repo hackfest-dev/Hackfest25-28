@@ -179,8 +179,11 @@ const batches = [
 export default function ManufacturerInventoryPage() {
   const [inventory, setInventory] = useState(inventoryData);
   const [searchTerm, setSearchTerm] = useState("");
+  const [inventoryQuantity, setInventoryQuantity] = useState(0);
   
   const {mutate: addSku} = api.manufacturer.addSku.useMutation();
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
+   
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [selectedBatch, setSelectedBatch] = useState("All Batches");
@@ -192,6 +195,7 @@ export default function ManufacturerInventoryPage() {
     price: 0,
     minorder: 0,
   });
+  
 
   // Filter inventory based on search term, category, location, and batch
   const filteredInventory = inventory.filter(
@@ -479,20 +483,7 @@ export default function ManufacturerInventoryPage() {
                         <TableCell>{item.batchNumber}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.id,
-                                  item.quantity - 100,
-                                )
-                              }
-                            >
-                              <Minus className="h-3 w-3" />
-                              <span className="sr-only">Decrease</span>
-                            </Button>
+                          
                             <span
                               className={
                                 isLowStock ? "font-bold text-red-500" : ""
@@ -500,20 +491,7 @@ export default function ManufacturerInventoryPage() {
                             >
                               {item.quantity}
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.id,
-                                  item.quantity + 100,
-                                )
-                              }
-                            >
-                              <Plus className="h-3 w-3" />
-                              <span className="sr-only">Increase</span>
-                            </Button>
+                            
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
@@ -817,7 +795,7 @@ export default function ManufacturerInventoryPage() {
       </Tabs>
 
       {/* Add Product Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+      {/* <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
@@ -900,26 +878,7 @@ export default function ManufacturerInventoryPage() {
               </div>
             </div>
            
-            {/* <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Select
-                value={newProduct.location}
-                onValueChange={(value) =>
-                  setNewProduct({ ...newProduct, location: value })
-                }
-              >
-                <SelectTrigger id="location">
-                  <SelectValue placeholder="Select Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {locations.slice(1).map((location) => (
-                    <SelectItem key={location} value={location}>
-                      {location}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
+            
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
@@ -933,7 +892,172 @@ export default function ManufacturerInventoryPage() {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
+
+
+      <Dialog
+              open={showAddInventoryDialog}
+              onOpenChange={setShowAddInventoryDialog}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Items to Inventory</DialogTitle>
+                  <DialogDescription>
+                    Enter the details of the new product to add to inventory.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="relative flex-1 overflow-y-auto">
+                    <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                    <Input
+                      type="search"
+                      placeholder="Search by name, brand, or barcode..."
+                      className="pl-8"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="max-h-64 overflow-y-auto rounded-md border">
+                      <table className="w-full text-sm">
+                        <TableBody>
+                          {filteredInventory?.length === 0 ? (
+                            <TableRow>
+                              <TableCell
+                                colSpan={8}
+                                className="text-muted-foreground py-4 text-center"
+                              >
+                                No products found. Try a different search term or
+                                filter.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            filteredInventory?.map((item) => (
+                              <TableRow
+                                key={item.id}
+                                // onClick={() =>
+                                //   setInventoryItem({
+                                //     ...item,
+                                //     shopkeeperId: 1,
+                                //     inventoryId: item.inventoryId,
+                                //   })
+                                // }
+                              >
+                                <TableCell className="font-medium">
+                                  {item.name}
+                                </TableCell>
+
+                                <TableCell>{item.category}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    {/* Action buttons or info */}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Product Name</Label>
+                      <Input
+                        id="name"
+                        value={"Name"}
+                        disabled={true}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input
+                        id="brand"
+                        value={"brand"}
+                        disabled={true}
+                        // onChange={(e) =>
+                        //   setNewProduct({ ...newProduct, brand: e.target.value })
+                        // }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        disabled={true}
+                        value={"category"}
+                        onValueChange={(value) =>
+                          setNewProduct({ ...newProduct, category: value })
+                        }
+                      >
+                        <SelectTrigger id="category">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.slice(1).map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="price">Price ($)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        disabled={true}
+                        value={"price"}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            price: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quantity">Quantity</Label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        step="0.01"
+                        value={"inventoryQuantity"}
+                        onChange={(e) => setInventoryQuantity(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="expiry">Expiry Date</Label>
+                      <Input
+                        id="expiry"
+                        type="date"
+                        value={"inventoryExpiry"}
+                        // onChange={(e) => setInventoryExpiry(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                    // onClick={handleAddInventory}
+                  >
+                    Add Product
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
     </div>
   );
 }
