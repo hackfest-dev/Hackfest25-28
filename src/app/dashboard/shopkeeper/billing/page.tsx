@@ -121,45 +121,11 @@ const productDatabase = [
 ];
 
 // Sample recent bills
-const recentBills = [
-  {
-    id: "INV-001",
-    date: "2023-04-18",
-    items: 5,
-    total: 45.97,
-    customer: "Walk-in Customer",
-  },
-  {
-    id: "INV-002",
-    date: "2023-04-18",
-    items: 3,
-    total: 22.47,
-    customer: "John Smith",
-  },
-  {
-    id: "INV-003",
-    date: "2023-04-17",
-    items: 8,
-    total: 67.92,
-    customer: "Walk-in Customer",
-  },
-  {
-    id: "INV-004",
-    date: "2023-04-17",
-    items: 2,
-    total: 12.98,
-    customer: "Sarah Johnson",
-  },
-  {
-    id: "INV-005",
-    date: "2023-04-16",
-    items: 6,
-    total: 54.94,
-    customer: "Walk-in Customer",
-  },
-];
+
+
 
 type CartItem = {
+  amount: any;
   id: number;
   name: string;
   price: number;
@@ -178,6 +144,44 @@ export default function BillingPage() {
   const [quantityFinal, setQuantity] = useState(0);
   
   const fetchInventory = api.shopkeeper.getInventory.useQuery({ shopkeeper: 1 });
+  const fetchBills = api.shopkeeper.getBilling.useQuery({ shopkeeperId: 1 });
+  const recentBills = fetchBills.data ??  [
+    {
+      id: "INV-001",
+      date: "2023-04-18",
+      items: 5,
+      total: 45.97,
+      customer: "Walk-in Customer",
+    },
+    {
+      id: "INV-002",
+      date: "2023-04-18",
+      items: 3,
+      total: 22.47,
+      customer: "John Smith",
+    },
+    {
+      id: "INV-003",
+      date: "2023-04-17",
+      items: 8,
+      total: 67.92,
+      customer: "Walk-in Customer",
+    },
+    {
+      id: "INV-004",
+      date: "2023-04-17",
+      items: 2,
+      total: 12.98,
+      customer: "Sarah Johnson",
+    },
+    {
+      id: "INV-005",
+      date: "2023-04-16",
+      items: 6,
+      total: 54.94,
+      customer: "Walk-in Customer",
+    },
+  ];
   const createBill = api.shopkeeper.createBilling
     .useMutation({
       onSuccess: () => {
@@ -516,118 +520,38 @@ export default function BillingPage() {
 
       {/* Recent Bills */}
       <Card>
-        <CardHeader>
-          <CardTitle>Recent Bills</CardTitle>
-          <CardDescription>
-            View and manage your recent transactions
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="today">
-            <TabsList>
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
-              <TabsTrigger value="week">This Week</TabsTrigger>
-            </TabsList>
-            <TabsContent value="today" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Invoice</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-right">Items</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentBills.slice(0, 2).map((bill) => (
-                    <TableRow key={bill.id}>
-                      <TableCell className="font-medium">{bill.id}</TableCell>
-                      <TableCell>{bill.date}</TableCell>
-                      <TableCell>{bill.customer}</TableCell>
-                      <TableCell className="text-right">{bill.items}</TableCell>
-                      <TableCell className="text-right">
-                        ${bill.total.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Printer className="mr-1 h-4 w-4" /> Print
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-            <TabsContent value="yesterday" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Invoice</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-right">Items</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentBills.slice(2, 4).map((bill) => (
-                    <TableRow key={bill.id}>
-                      <TableCell className="font-medium">{bill.id}</TableCell>
-                      <TableCell>{bill.date}</TableCell>
-                      <TableCell>{bill.customer}</TableCell>
-                      <TableCell className="text-right">{bill.items}</TableCell>
-                      <TableCell className="text-right">
-                        ${bill.total.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Printer className="mr-1 h-4 w-4" /> Print
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-            <TabsContent value="week" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Invoice</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-right">Items</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentBills.map((bill) => (
-                    <TableRow key={bill.id}>
-                      <TableCell className="font-medium">{bill.id}</TableCell>
-                      <TableCell>{bill.date}</TableCell>
-                      <TableCell>{bill.customer}</TableCell>
-                      <TableCell className="text-right">{bill.items}</TableCell>
-                      <TableCell className="text-right">
-                        ${bill.total.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Printer className="mr-1 h-4 w-4" /> Print
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+  <CardHeader>
+    <CardTitle>Recent Bills</CardTitle>
+    <CardDescription>
+      View and manage your recent transactions
+    </CardDescription>
+  </CardHeader>
+  <CardContent>
+    <Tabs defaultValue="today">
+      <TabsList>
+        <TabsTrigger value="today">Today</TabsTrigger>
+        <TabsTrigger value="yesterday">Yesterday</TabsTrigger>
+        <TabsTrigger value="week">This Week</TabsTrigger>
+      </TabsList>
+      <TabsContent value="today" className="mt-4">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Invoice</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Payment Method</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+           
+          </TableBody>
+        </Table>
+      </TabsContent>
+    </Tabs>
+  </CardContent>
+</Card>
 
       {/* Payment Dialog */}
       <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>

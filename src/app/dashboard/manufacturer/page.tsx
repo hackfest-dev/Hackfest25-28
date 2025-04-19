@@ -20,9 +20,9 @@ import Link from "next/link";
 import { api } from "~/trpc/react";
 
 export default function ManufacturerDashboard() {
-  const dat = api.dashboard.getManufacturerTotalRevenue.useQuery({
-    manufacturerId: 1,
-  });
+  // const dat = api.dashboard.getManufacturerTotalRevenue.useQuery({
+  //   manufacturerId: 1,
+  // });
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold tracking-tight">
@@ -92,11 +92,11 @@ export default function ManufacturerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {dat.isLoading
+              {/* {dat.isLoading
                 ? "Loading..."
                 : dat.isError
                   ? "Error"
-                  : `$${dat.data}`}
+                  : `$${dat.data}`} */}
             </div>
 
             <p className="text-muted-foreground text-xs">
