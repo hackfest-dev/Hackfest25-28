@@ -4,6 +4,7 @@ import type React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Eye, EyeOff, Store, Truck } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -121,7 +122,7 @@ export function LoginForm() {
             </RadioGroup>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col space-y-4">
           <Button
             className="w-full bg-emerald-600 hover:bg-emerald-700"
             type="submit"
@@ -129,6 +130,12 @@ export function LoginForm() {
           >
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
+          <div className="text-muted-foreground text-center text-sm">
+            Don't have an account?{" "}
+            <Link href="/register" className="text-emerald-600 hover:underline">
+              Register here
+            </Link>
+          </div>
         </CardFooter>
       </form>
     </Card>

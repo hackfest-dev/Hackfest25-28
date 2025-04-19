@@ -15,6 +15,7 @@ import {
   Plus,
   Search,
   Upload,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -63,22 +64,22 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
-
+import InventoryDetails from "~/app/_components/InventoryDetails";
 
 // Sample inventory data
 
 interface shopItemType extends shopItem {
   inventory?: {
-        id: number;
-        skuId: number | null;
-        quantity: number;
+    id: number;
+    skuId: number | null;
+    quantity: number;
   };
   shopKeeper?: {
     name: string;
-        id: number;
-        categories: string[];
-        rating: number;
-        deliveryTime: string;
+    id: number;
+    categories: string[];
+    rating: number;
+    deliveryTime: string;
   };
 }
 
@@ -138,9 +139,9 @@ const inventoryData = [
     name: "Sparkling Water (6-pack)",
     brand: "Crystal Clear",
     category: "Beverages",
-    quantity: 18,
+    quantity: 2,
     price: 4.99,
-    expiry: "2024-02-15",
+    expiry: "2026-02-15",
     barcode: "8901234567895",
   },
   {
@@ -203,11 +204,12 @@ export default function InventoryPage() {
   });
   const [shopItems, setShopItems] = useState<shopItemType[]>([]);
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
-  const {mutate: addInventoryItem} = api.shopkeeper.createInventoryBatch.useMutation();
+  const { mutate: addInventoryItem } =
+    api.shopkeeper.createInventoryBatch.useMutation();
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
-  const [searchEvent,setSearchEvent] = useState(false)
+  const [searchEvent, setSearchEvent] = useState(false);
   const [inventoryExpiry, setInventoryExpiry] = useState("");
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -218,12 +220,14 @@ export default function InventoryPage() {
     expiry: "",
     barcode: "",
   });
+  const [selectedInventory, setSelectedInventory] = useState<any>(null);
+  const [showInventoryDetails, setShowInventoryDetails] = useState(false);
 
   // const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
-  const {data : getShopItems, refetch: fetchShopItems} = api.shopkeeper.getShopItems.useQuery({shopkeeperid:1})
-  const {mutate: addShopItem} = api.shopkeeper.createShopItem.useMutation();
+  const { data: getShopItems, refetch: fetchShopItems } =
+    api.shopkeeper.getShopItems.useQuery({ shopkeeperid: 1 });
+  const { mutate: addShopItem } = api.shopkeeper.createShopItem.useMutation();
   // const addProduct = api.shopkeeper.
-    
 
   // Filter inventory based on search term, brand, and category
   const filteredInventory = getShopItems
@@ -240,12 +244,12 @@ export default function InventoryPage() {
     .filter(
       (item) =>
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        (((item.name ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ??
+        ((item.name ?? "").toLowerCase().includes(searchTerm.toLowerCase()) ??
           item.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
         (selectedBrand === "All Brands" || item.brand === selectedBrand) &&
         (selectedCategory === "All Categories" ||
-          item.category === selectedCategory)
-    ));
+          item.category === selectedCategory),
+    );
 
   // Get low stock items (quantity < 5)
   const lowStockItems = inventory.filter((item) => item.quantity < 5);
@@ -260,40 +264,45 @@ export default function InventoryPage() {
   });
 
   // Add new product
-  const handleAddProduct =async () => {
-    addShopItem({
-      name: newProduct.name,
-      brand: newProduct.brand,
-      category: newProduct.category,
-      price: newProduct.price,
-      shopkeeperId: 1
-    }, {onSuccess: () => {
-      fetchShopItems();
-      setShowAddDialog(false);
-      setNewProduct({
-        name: "",
-        brand: "",
-        category: "",
-        quantity: 0,
-        price: 0,
-        expiry: "",
-        barcode: "",
-      });
-    }});
-    }
+  const handleAddProduct = async () => {
+    addShopItem(
+      {
+        name: newProduct.name,
+        brand: newProduct.brand,
+        category: newProduct.category,
+        price: newProduct.price,
+        shopkeeperId: 1,
+      },
+      {
+        onSuccess: () => {
+          fetchShopItems();
+          setShowAddDialog(false);
+          setNewProduct({
+            name: "",
+            brand: "",
+            category: "",
+            quantity: 0,
+            price: 0,
+            expiry: "",
+            barcode: "",
+          });
+        },
+      },
+    );
+  };
 
-      // setShowAddDialog(false);
-    // setNewProduct({
-    //   name: "",
+  // setShowAddDialog(false);
+  // setNewProduct({
+  //   name: "",
 
-    //   expiry: "",
-    //   barcode: "",
-    // });
+  //   expiry: "",
+  //   barcode: "",
+  // });
 
-  const handleAddInventory =async () => {
+  const handleAddInventory = async () => {
     addInventoryItem({
       inventoryId: Number(inventoryItem?.inventoryId),
-      quantity: inventoryQuantity
+      quantity: inventoryQuantity,
     });
 
     setShowAddInventoryDialog(false);
@@ -304,7 +313,7 @@ export default function InventoryPage() {
       category: "",
       price: 0,
       inventoryId: 0,
-      shopkeeperId: 0, 
+      shopkeeperId: 0,
     });
 
     setInventoryQuantity(0);
@@ -317,7 +326,6 @@ export default function InventoryPage() {
     //   expiry: "",
     //   barcode: "",
     // });
-    
   };
   // Delete product
   const handleDeleteProduct = (id: number) => {
@@ -330,6 +338,11 @@ export default function InventoryPage() {
     setInventory(
       inventory.map((item) => (item.id === id ? { ...item, quantity } : item)),
     );
+  };
+
+  const handleViewInventory = (item: any) => {
+    setSelectedInventory(item);
+    setShowInventoryDetails(true);
   };
 
   return (
@@ -354,11 +367,11 @@ export default function InventoryPage() {
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
           <Button
-              className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={()=>setShowAddInventoryDialog(true)}
-            >
-            <Plus className="mr-2 h-4 w-4" />  Add Items to Inventory
-            </Button>
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => setShowAddInventoryDialog(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Items to Inventory
+          </Button>
         </div>
       </div>
 
@@ -401,11 +414,10 @@ export default function InventoryPage() {
                 placeholder="Search by name, brand, or barcode..."
                 className="pl-8"
                 value={searchTerm}
-                onSelect={(e)=>setSearchEvent(true)}
-                onChange={(e) => {setSearchTerm(e.target.value);}
-              
-              
-              }
+                onSelect={(e) => setSearchEvent(true)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                }}
               />
             </div>
             <div className="flex gap-2">
@@ -440,10 +452,7 @@ export default function InventoryPage() {
                 <Filter className="h-4 w-4" />
                 <span className="sr-only">Filter</span>
               </Button>
-            </div>  
-
-
-          
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -465,8 +474,7 @@ export default function InventoryPage() {
                   </div>
                 </TableHead>
                 <TableHead className="text-right">Price</TableHead>
-                <TableHead>Expiry Date</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -495,7 +503,6 @@ export default function InventoryPage() {
                       <TableCell>{item.category}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          
                           <span
                             className={
                               isLowStock ? "font-bold text-red-500" : ""
@@ -503,14 +510,12 @@ export default function InventoryPage() {
                           >
                             {item.quantity}
                           </span>
-                          
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                      ₹{item.price.toFixed(2)}
+                        ₹{item.price.toFixed(2)}
                       </TableCell>
-                      <TableCell>{item.expiry}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-right">
                         {isExpired && (
                           <Badge variant="destructive">Expired</Badge>
                         )}
@@ -538,14 +543,15 @@ export default function InventoryPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem>Edit Product</DropdownMenuItem>
-                            <DropdownMenuItem>View History</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => handleDeleteProduct(item.id)}
                             >
                               Delete Product
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewInventory(item)}>
+                              View Product
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -556,23 +562,10 @@ export default function InventoryPage() {
               )}
               {/* {getInventory.data?.length && <div>
                  {JSON.stringify(getInventory.data)}
-                {/* {getInventory.data.map((item)=>{console.log(item)})} */}  
+                {/* {getInventory.data.map((item)=>{console.log(item)})} */}
             </TableBody>
           </Table>
         </CardContent>
-        <CardFooter className="flex justify-between py-4">
-          <div className="text-muted-foreground text-sm">
-            Showing {filteredInventory?.length} of {shopItems.length} products
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Download className="mr-2 h-4 w-4" /> Export
-            </Button>
-            <Button variant="outline" size="sm">
-              <Upload className="mr-2 h-4 w-4" /> Import
-            </Button>
-          </div>
-        </CardFooter>
       </Card>
 
       {/* Tabs for Low Stock and Expiring Items */}
@@ -764,7 +757,6 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-           
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -782,9 +774,7 @@ export default function InventoryPage() {
                   }
                 />
               </div>
-              
             </div>
-           
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
@@ -796,12 +786,14 @@ export default function InventoryPage() {
             >
               Add Product
             </Button>
-            
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
+      <Dialog
+        open={showAddInventoryDialog}
+        onOpenChange={setShowAddInventoryDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Items to Inventory</DialogTitle>
@@ -810,7 +802,7 @@ export default function InventoryPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-          <div className="relative flex-1 overflow-y-auto ">
+            <div className="relative flex-1 overflow-y-auto">
               <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
               <Input
                 type="search"
@@ -819,35 +811,47 @@ export default function InventoryPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-             <div className="max-h-64 overflow-y-auto border rounded-md">
-    <table className="w-full text-sm">
-      <TableBody>
-        {filteredInventory?.length === 0 ? (
-          <TableRow>
-            <TableCell
-              colSpan={8}
-              className="text-muted-foreground py-4 text-center"
-            >
-              No products found. Try a different search term or filter.
-            </TableCell>
-          </TableRow>
-        ) : (
-          filteredInventory?.map((item) => (
-            <TableRow key={item.id} onClick={() => setInventoryItem({ ...item, shopkeeperId: 1, inventoryId: item.inventoryId })}>
-              <TableCell className="font-medium">{item.name}</TableCell>
-              <TableCell>{item.brand}</TableCell>
-              <TableCell>{item.category}</TableCell>
-              <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
-                  {/* Action buttons or info */}
-                </div>
-              </TableCell>
-            </TableRow>
-          ))
-        )}
-      </TableBody>
-    </table>
-  </div>
+              <div className="max-h-64 overflow-y-auto rounded-md border">
+                <table className="w-full text-sm">
+                  <TableBody>
+                    {filteredInventory?.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={8}
+                          className="text-muted-foreground py-4 text-center"
+                        >
+                          No products found. Try a different search term or
+                          filter.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredInventory?.map((item) => (
+                        <TableRow
+                          key={item.id}
+                          onClick={() =>
+                            setInventoryItem({
+                              ...item,
+                              shopkeeperId: 1,
+                              inventoryId: item.inventoryId,
+                            })
+                          }
+                        >
+                          <TableCell className="font-medium">
+                            {item.name}
+                          </TableCell>
+                          <TableCell>{item.brand}</TableCell>
+                          <TableCell>{item.category}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* Action buttons or info */}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </table>
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -877,7 +881,7 @@ export default function InventoryPage() {
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
-                disabled={true}
+                  disabled={true}
                   value={inventoryItem?.category}
                   onValueChange={(value) =>
                     setNewProduct({ ...newProduct, category: value })
@@ -895,7 +899,6 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-           
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -921,14 +924,9 @@ export default function InventoryPage() {
                   type="number"
                   step="0.01"
                   value={inventoryQuantity}
-                  onChange={(e) =>
-                    setInventoryQuantity(
-                      Number(e.target.value)
-                )
-                  }
+                  onChange={(e) => setInventoryQuantity(Number(e.target.value))}
                 />
               </div>
-              
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -937,14 +935,10 @@ export default function InventoryPage() {
                   id="expiry"
                   type="date"
                   value={inventoryExpiry}
-                  onChange={(e) =>
-                    setInventoryExpiry(e.target.value)
-                  }
+                  onChange={(e) => setInventoryExpiry(e.target.value)}
                 />
               </div>
-             
-</div>
-           
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
@@ -956,34 +950,17 @@ export default function InventoryPage() {
             >
               Add Product
             </Button>
-            
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
+      <Dialog open={showInventoryDetails} onOpenChange={setShowInventoryDetails}>
+        <DialogContent>
+          {selectedInventory && (
+            <InventoryDetails inventory={selectedInventory} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="19" cy="12" r="1" />
-      <circle cx="5" cy="12" r="1" />
-    </svg>
-  );
-}
-
-

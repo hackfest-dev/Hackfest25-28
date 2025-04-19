@@ -318,19 +318,17 @@ export const shopRouter = createTRPCRouter({
       });
       return billing;
     }),
-  getBilling: publicProcedure
-    .input(z.object({ id: z.number() }))
+    getBilling: publicProcedure
+    .input(z.object({ shopkeeperId: z.number() }))
     .query(async ({ input, ctx }) => {
-      const billing = await ctx.db.billing.findUnique({
-        where: { id: input.id },
-        include: {
-          shopkeeper: true,
-          billItem: true,
-          customer: true,
+      const billing = await ctx.db.billing.findMany({
+        where: {
+          shopkeeperId: input.shopkeeperId,
         },
       });
       return billing;
     }),
+    
   updateBilling: publicProcedure
     .input(
       z.object({

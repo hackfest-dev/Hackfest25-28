@@ -1,16 +1,30 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
 import { useState } from "react"
-import { AlertCircle, ArrowUpDown, Download, Filter, Plus, Search, Upload } from "lucide-react"
+import { AlertCircle, ArrowUpDown, BarChart3, ClipboardList, Download, Filter, LayoutDashboard, Package, Plus, Search, Upload } from "lucide-react"
 
-import { Button } from "~/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
-import { Input } from "~/components/ui/input"
-import { Label } from "~/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table"
-import { Badge } from "~/components/ui/badge"
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { Badge } from "~/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +32,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "~/components/ui/dialog"
+} from "~/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +44,8 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
+import Link from "next/link"
+import { api } from "~/trpc/react"
 
 // Sample inventory data
 const inventoryData = [
@@ -129,11 +145,25 @@ const inventoryData = [
     expiryDate: "2025-01-15",
     location: "Warehouse C",
   },
-]
+];
 
 // Sample categories and locations for filters
-const categories = ["All Categories", "Dairy", "Bakery", "Produce", "Confectionery", "Beverages", "Snacks", "Household"]
-const locations = ["All Locations", "Warehouse A", "Warehouse B", "Warehouse C"]
+const categories = [
+  "All Categories",
+  "Dairy",
+  "Bakery",
+  "Produce",
+  "Confectionery",
+  "Beverages",
+  "Snacks",
+  "Household",
+];
+const locations = [
+  "All Locations",
+  "Warehouse A",
+  "Warehouse B",
+  "Warehouse C",
+];
 const batches = [
   "All Batches",
   "BAT-10045",
@@ -144,26 +174,28 @@ const batches = [
   "BAT-10050",
   "BAT-10051",
   "BAT-10052",
-]
+];
 
 export default function ManufacturerInventoryPage() {
-  const [inventory, setInventory] = useState(inventoryData)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("All Categories")
-  const [selectedLocation, setSelectedLocation] = useState("All Locations")
-  const [selectedBatch, setSelectedBatch] = useState("All Batches")
-  const [showAddDialog, setShowAddDialog] = useState(false)
+  const [inventory, setInventory] = useState(inventoryData);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [inventoryQuantity, setInventoryQuantity] = useState(0);
+  
+  const {mutate: addSku} = api.manufacturer.addSku.useMutation();
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
+   
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [selectedLocation, setSelectedLocation] = useState("All Locations");
+  const [selectedBatch, setSelectedBatch] = useState("All Batches");
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [newProduct, setNewProduct] = useState({
     sku: "",
     name: "",
     category: "",
-    batchNumber: "",
-    quantity: 0,
     price: 0,
-    manufactureDate: "",
-    expiryDate: "",
-    location: "",
-  })
+    minorder: 0,
+  });
+  
 
   // Filter inventory based on search term, category, location, and batch
   const filteredInventory = inventory.filter(
@@ -171,56 +203,105 @@ export default function ManufacturerInventoryPage() {
       (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.batchNumber.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedCategory === "All Categories" || item.category === selectedCategory) &&
-      (selectedLocation === "All Locations" || item.location === selectedLocation) &&
+      (selectedCategory === "All Categories" ||
+        item.category === selectedCategory) &&
+      (selectedLocation === "All Locations" ||
+        item.location === selectedLocation) &&
       (selectedBatch === "All Batches" || item.batchNumber === selectedBatch),
-  )
+  );
 
   // Get low stock items (quantity < 300)
-  const lowStockItems = inventory.filter((item) => item.quantity < 300)
+  const lowStockItems = inventory.filter((item) => item.quantity < 300);
 
   // Get expired or soon to expire items (within 7 days)
-  const today = new Date()
-  const sevenDaysLater = new Date(today)
-  sevenDaysLater.setDate(today.getDate() + 7)
+  const today = new Date();
+  const sevenDaysLater = new Date(today);
+  sevenDaysLater.setDate(today.getDate() + 7);
 
   const expiringItems = inventory.filter((item) => {
-    const expiryDate = new Date(item.expiryDate)
-    return expiryDate <= sevenDaysLater
-  })
+    const expiryDate = new Date(item.expiryDate);
+    return expiryDate <= sevenDaysLater;
+  });
 
   // Add new product
   const handleAddProduct = () => {
-    const id = Math.max(...inventory.map((item) => item.id)) + 1
-    setInventory([...inventory, { id, ...newProduct }])
+    // addSku({
+    //   skuId: newProduct.sku,
+    //   prodName: newProduct.name,
+    //   category: newProduct.category,
+    //   minorder: newProduct.minorder,
+    //   price: newProduct.price,
+    //   maid: 1
+    // }, {
+    //   onSuccess:{
+    //     void getSkus();
+    //   }
+    // });
+    
     setShowAddDialog(false)
     setNewProduct({
       sku: "",
       name: "",
       category: "",
-      batchNumber: "",
-      quantity: 0,
       price: 0,
-      manufactureDate: "",
-      expiryDate: "",
-      location: "",
+      minorder: 0,
     })
   }
 
   // Delete product
   const handleDeleteProduct = (id: number) => {
-    setInventory(inventory.filter((item) => item.id !== id))
-  }
+    setInventory(inventory.filter((item) => item.id !== id));
+  };
 
   // Update product quantity
   const handleUpdateQuantity = (id: number, quantity: number) => {
-    if (quantity < 0) return
-    setInventory(inventory.map((item) => (item.id === id ? { ...item, quantity } : item)))
-  }
+    if (quantity < 0) return;
+    setInventory(
+      inventory.map((item) => (item.id === id ? { ...item, quantity } : item)),
+    );
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="mb-2 flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer"
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/analytics"
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Analytics</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/orders"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Orders</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/inventory"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Inventory</span>
+          </Link>
+        </Button>
+      </div>
         <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="flex items-center gap-2">
@@ -231,8 +312,11 @@ export default function ManufacturerInventoryPage() {
             <Download className="h-4 w-4" />
             Export
           </Button>
-          <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => setShowAddDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" /> Add Product
+          <Button
+            className="bg-emerald-600 hover:bg-emerald-700"
+            onClick={() => setShowAddDialog(true)}
+          >
+            <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
         </div>
       </div>
@@ -245,7 +329,8 @@ export default function ManufacturerInventoryPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Low Stock Alert</AlertTitle>
               <AlertDescription>
-                {lowStockItems.length} products are running low on stock. Please restock soon.
+                {lowStockItems.length} products are running low on stock. Please
+                restock soon.
               </AlertDescription>
             </Alert>
           )}
@@ -254,7 +339,8 @@ export default function ManufacturerInventoryPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Expiry Alert</AlertTitle>
               <AlertDescription>
-                {expiringItems.length} products are expiring soon or have already expired.
+                {expiringItems.length} products are expiring soon or have
+                already expired.
               </AlertDescription>
             </Alert>
           )}
@@ -266,9 +352,9 @@ export default function ManufacturerInventoryPage() {
         <CardHeader className="pb-3">
           <CardTitle>Product Inventory</CardTitle>
           <CardDescription>Manage your manufacturing inventory</CardDescription>
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <div className="mt-4 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
               <Input
                 type="search"
                 placeholder="Search by name, SKU, or batch number..."
@@ -278,7 +364,10 @@ export default function ManufacturerInventoryPage() {
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory}
+                onValueChange={setSelectedCategory}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Category" />
                 </SelectTrigger>
@@ -290,7 +379,10 @@ export default function ManufacturerInventoryPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+              <Select
+                value={selectedLocation}
+                onValueChange={setSelectedLocation}
+              >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select Location" />
                 </SelectTrigger>
@@ -318,10 +410,10 @@ export default function ManufacturerInventoryPage() {
                 variant="outline"
                 size="icon"
                 onClick={() => {
-                  setSelectedCategory("All Categories")
-                  setSelectedLocation("All Locations")
-                  setSelectedBatch("All Batches")
-                  setSearchTerm("")
+                  setSelectedCategory("All Categories");
+                  setSelectedLocation("All Locations");
+                  setSelectedBatch("All Batches");
+                  setSearchTerm("");
                 }}
               >
                 <Filter className="h-4 w-4" />
@@ -360,86 +452,78 @@ export default function ManufacturerInventoryPage() {
                   <TableHead>Expiry Date</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">View inventory</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredInventory.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={11} className="text-center py-4 text-muted-foreground">
+                    <TableCell
+                      colSpan={11}
+                      className="text-muted-foreground py-4 text-center"
+                    >
                       No products found. Try a different search term or filter.
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredInventory.map((item) => {
-                    const isLowStock = item.quantity < 300
-                    const expiryDate = new Date(item.expiryDate)
-                    const isExpired = expiryDate <= today
-                    const isExpiringSoon = expiryDate <= sevenDaysLater && expiryDate > today
+                    const isLowStock = item.quantity < 300;
+                    const expiryDate = new Date(item.expiryDate);
+                    const isExpired = expiryDate <= today;
+                    const isExpiringSoon =
+                      expiryDate <= sevenDaysLater && expiryDate > today;
 
                     return (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.sku}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.sku}
+                        </TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.category}</TableCell>
                         <TableCell>{item.batchNumber}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity - 100)}
+                          
+                            <span
+                              className={
+                                isLowStock ? "font-bold text-red-500" : ""
+                              }
                             >
-                              <Minus className="h-3 w-3" />
-                              <span className="sr-only">Decrease</span>
-                            </Button>
-                            <span className={isLowStock ? "text-red-500 font-bold" : ""}>{item.quantity}</span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => handleUpdateQuantity(item.id, item.quantity + 100)}
-                            >
-                              <Plus className="h-3 w-3" />
-                              <span className="sr-only">Increase</span>
-                            </Button>
+                              {item.quantity}
+                            </span>
+                            
                           </div>
                         </TableCell>
-                        <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">
+                          ${item.price.toFixed(2)}
+                        </TableCell>
                         <TableCell>{item.manufactureDate}</TableCell>
                         <TableCell>{item.expiryDate}</TableCell>
                         <TableCell>{item.location}</TableCell>
                         <TableCell>
-                          {isExpired && <Badge variant="destructive">Expired</Badge>}
-                          {isExpiringSoon && <Badge variant="default">Expiring Soon</Badge>}
-                          {isLowStock && <Badge variant="destructive">Low Stock</Badge>}
-                          {!isExpired && !isExpiringSoon && !isLowStock && <Badge variant="outline">In Stock</Badge>}
+                          {isExpired && (
+                            <Badge variant="destructive">Expired</Badge>
+                          )}
+                          {isExpiringSoon && (
+                            <Badge variant="default">Expiring Soon</Badge>
+                          )}
+                          {isLowStock && (
+                            <Badge variant="destructive">Low Stock</Badge>
+                          )}
+                          {!isExpired && !isExpiringSoon && !isLowStock && (
+                            <Badge variant="outline">In Stock</Badge>
+                          )}
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
+                              
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Edit Product</DropdownMenuItem>
-                              <DropdownMenuItem>View History</DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteProduct(item.id)}
-                              >
-                                Delete Product
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
+                            <Button key={item.id} onClick={()=>alert(`view triggred ${item.id}`)}>View</Button>
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })
                 )}
               </TableBody>
@@ -447,15 +531,15 @@ export default function ManufacturerInventoryPage() {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between py-4">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             Showing {filteredInventory.length} of {inventory.length} products
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" /> Export
+              <Download className="mr-2 h-4 w-4" /> Export
             </Button>
             <Button variant="outline" size="sm">
-              <Upload className="h-4 w-4 mr-2" /> Import
+              <Upload className="mr-2 h-4 w-4" /> Import
             </Button>
           </div>
         </CardFooter>
@@ -488,7 +572,9 @@ export default function ManufacturerInventoryPage() {
           <Card>
             <CardHeader>
               <CardTitle>Low Stock Items</CardTitle>
-              <CardDescription>Products that need to be restocked soon</CardDescription>
+              <CardDescription>
+                Products that need to be restocked soon
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -505,18 +591,25 @@ export default function ManufacturerInventoryPage() {
                 <TableBody>
                   {lowStockItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
+                      <TableCell
+                        colSpan={6}
+                        className="text-muted-foreground py-4 text-center"
+                      >
                         No low stock items. Your inventory is well-stocked!
                       </TableCell>
                     </TableRow>
                   ) : (
                     lowStockItems.map((item) => (
                       <TableRow key={item.id}>
-                        <TableCell className="font-medium">{item.sku}</TableCell>
+                        <TableCell className="font-medium">
+                          {item.sku}
+                        </TableCell>
                         <TableCell>{item.name}</TableCell>
                         <TableCell>{item.category}</TableCell>
                         <TableCell>{item.batchNumber}</TableCell>
-                        <TableCell className="text-right text-red-500 font-bold">{item.quantity}</TableCell>
+                        <TableCell className="text-right font-bold text-red-500">
+                          {item.quantity}
+                        </TableCell>
                         <TableCell className="text-right">
                           <Button variant="outline" size="sm">
                             Restock
@@ -534,7 +627,9 @@ export default function ManufacturerInventoryPage() {
           <Card>
             <CardHeader>
               <CardTitle>Expiring Items</CardTitle>
-              <CardDescription>Products that are expiring soon or have already expired</CardDescription>
+              <CardDescription>
+                Products that are expiring soon or have already expired
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
@@ -552,17 +647,22 @@ export default function ManufacturerInventoryPage() {
                 <TableBody>
                   {expiringItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-4 text-muted-foreground">
+                      <TableCell
+                        colSpan={7}
+                        className="text-muted-foreground py-4 text-center"
+                      >
                         No expiring items. Your inventory is fresh!
                       </TableCell>
                     </TableRow>
                   ) : (
                     expiringItems.map((item) => {
-                      const expiryDate = new Date(item.expiryDate)
-                      const isExpired = expiryDate <= today
+                      const expiryDate = new Date(item.expiryDate);
+                      const isExpired = expiryDate <= today;
                       return (
                         <TableRow key={item.id}>
-                          <TableCell className="font-medium">{item.sku}</TableCell>
+                          <TableCell className="font-medium">
+                            {item.sku}
+                          </TableCell>
                           <TableCell>{item.name}</TableCell>
                           <TableCell>{item.batchNumber}</TableCell>
                           <TableCell>{item.manufactureDate}</TableCell>
@@ -580,7 +680,7 @@ export default function ManufacturerInventoryPage() {
                             </Button>
                           </TableCell>
                         </TableRow>
-                      )
+                      );
                     })
                   )}
                 </TableBody>
@@ -592,7 +692,9 @@ export default function ManufacturerInventoryPage() {
           <Card>
             <CardHeader>
               <CardTitle>Batch Management</CardTitle>
-              <CardDescription>Track and manage product batches</CardDescription>
+              <CardDescription>
+                Track and manage product batches
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -602,32 +704,57 @@ export default function ManufacturerInventoryPage() {
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{batch}</CardTitle>
                         <Badge variant="outline">
-                          {inventory.filter((item) => item.batchNumber === batch).length} Products
+                          {
+                            inventory.filter(
+                              (item) => item.batchNumber === batch,
+                            ).length
+                          }{" "}
+                          Products
                         </Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="pb-2">
                       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                         <div>
-                          <div className="text-sm font-medium text-muted-foreground">Manufacture Date</div>
+                          <div className="text-muted-foreground text-sm font-medium">
+                            Manufacture Date
+                          </div>
                           <div className="font-medium">
-                            {inventory.find((item) => item.batchNumber === batch)?.manufactureDate}
+                            {
+                              inventory.find(
+                                (item) => item.batchNumber === batch,
+                              )?.manufactureDate
+                            }
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-muted-foreground">Expiry Date</div>
+                          <div className="text-muted-foreground text-sm font-medium">
+                            Expiry Date
+                          </div>
                           <div className="font-medium">
-                            {inventory.find((item) => item.batchNumber === batch)?.expiryDate}
+                            {
+                              inventory.find(
+                                (item) => item.batchNumber === batch,
+                              )?.expiryDate
+                            }
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-muted-foreground">Location</div>
+                          <div className="text-muted-foreground text-sm font-medium">
+                            Location
+                          </div>
                           <div className="font-medium">
-                            {inventory.find((item) => item.batchNumber === batch)?.location}
+                            {
+                              inventory.find(
+                                (item) => item.batchNumber === batch,
+                              )?.location
+                            }
                           </div>
                         </div>
                         <div>
-                          <div className="text-sm font-medium text-muted-foreground">Total Quantity</div>
+                          <div className="text-muted-foreground text-sm font-medium">
+                            Total Quantity
+                          </div>
                           <div className="font-medium">
                             {inventory
                               .filter((item) => item.batchNumber === batch)
@@ -650,11 +777,13 @@ export default function ManufacturerInventoryPage() {
       </Tabs>
 
       {/* Add Product Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+      {/* <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Add New Product</DialogTitle>
-            <DialogDescription>Enter the details of the new product to add to inventory.</DialogDescription>
+            <DialogDescription>
+              Enter the details of the new product to add to inventory.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-2 gap-4">
@@ -663,7 +792,9 @@ export default function ManufacturerInventoryPage() {
                 <Input
                   id="sku"
                   value={newProduct.sku}
-                  onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, sku: e.target.value })
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -671,16 +802,20 @@ export default function ManufacturerInventoryPage() {
                 <Input
                   id="name"
                   value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
                   value={newProduct.category}
-                  onValueChange={(value) => setNewProduct({ ...newProduct, category: value })}
+                  onValueChange={(value) =>
+                    setNewProduct({ ...newProduct, category: value })
+                  }
                 >
                   <SelectTrigger id="category">
                     <SelectValue placeholder="Select Category" />
@@ -694,25 +829,10 @@ export default function ManufacturerInventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="batchNumber">Batch Number</Label>
-                <Input
-                  id="batchNumber"
-                  value={newProduct.batchNumber}
-                  onChange={(e) => setNewProduct({ ...newProduct, batchNumber: e.target.value })}
-                />
-              </div>
+             
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={newProduct.quantity}
-                  onChange={(e) => setNewProduct({ ...newProduct, quantity: Number(e.target.value) })}
-                />
-              </div>
+             
               <div className="space-y-2">
                 <Label htmlFor="price">Price ($)</Label>
                 <Input
@@ -720,61 +840,208 @@ export default function ManufacturerInventoryPage() {
                   type="number"
                   step="0.01"
                   value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: Number(e.target.value) })}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="manufactureDate">Manufacture Date</Label>
-                <Input
-                  id="manufactureDate"
-                  type="date"
-                  value={newProduct.manufactureDate}
-                  onChange={(e) => setNewProduct({ ...newProduct, manufactureDate: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      price: Number(e.target.value),
+                    })
+                  }
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="expiryDate">Expiry Date</Label>
+                <Label htmlFor="minorder">Min Order</Label>
                 <Input
-                  id="expiryDate"
-                  type="date"
-                  value={newProduct.expiryDate}
-                  onChange={(e) => setNewProduct({ ...newProduct, expiryDate: e.target.value })}
+                  id="minorder"
+                  type="number"
+                  step="1"
+                  value={newProduct.minorder}
+                  onChange={(e) => setNewProduct({ ...newProduct, minorder: Number(e.target.value) })}
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Select
-                value={newProduct.location}
-                onValueChange={(value) => setNewProduct({ ...newProduct, location: value })}
-              >
-                <SelectTrigger id="location">
-                  <SelectValue placeholder="Select Location" />
-                </SelectTrigger>
-                <SelectContent>
-                  {locations.slice(1).map((location) => (
-                    <SelectItem key={location} value={location}>
-                      {location}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+           
+            
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
               Cancel
             </Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={handleAddProduct}>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAddProduct}
+            >
               Add Product
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
+
+
+      <Dialog
+              open={showAddInventoryDialog}
+              onOpenChange={setShowAddInventoryDialog}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Items to Inventory</DialogTitle>
+                  <DialogDescription>
+                    Enter the details of the new product to add to inventory.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="relative flex-1 overflow-y-auto">
+                    <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                    <Input
+                      type="search"
+                      placeholder="Search by name, brand, or barcode..."
+                      className="pl-8"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="max-h-64 overflow-y-auto rounded-md border">
+                      <table className="w-full text-sm">
+                        <TableBody>
+                          {filteredInventory?.length === 0 ? (
+                            <TableRow>
+                              <TableCell
+                                colSpan={8}
+                                className="text-muted-foreground py-4 text-center"
+                              >
+                                No products found. Try a different search term or
+                                filter.
+                              </TableCell>
+                            </TableRow>
+                          ) : (
+                            filteredInventory?.map((item) => (
+                              <TableRow
+                                key={item.id}
+                                // onClick={() =>
+                                //   setInventoryItem({
+                                //     ...item,
+                                //     shopkeeperId: 1,
+                                //     inventoryId: item.inventoryId,
+                                //   })
+                                // }
+                              >
+                                <TableCell className="font-medium">
+                                  {item.name}
+                                </TableCell>
+
+                                <TableCell>{item.category}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    {/* Action buttons or info */}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </TableBody>
+                      </table>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Product Name</Label>
+                      <Input
+                        id="name"
+                        value={"Name"}
+                        disabled={true}
+                        onChange={(e) =>
+                          setNewProduct({ ...newProduct, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input
+                        id="brand"
+                        value={"brand"}
+                        disabled={true}
+                        // onChange={(e) =>
+                        //   setNewProduct({ ...newProduct, brand: e.target.value })
+                        // }
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="category">Category</Label>
+                      <Select
+                        disabled={true}
+                        value={"category"}
+                        onValueChange={(value) =>
+                          setNewProduct({ ...newProduct, category: value })
+                        }
+                      >
+                        <SelectTrigger id="category">
+                          <SelectValue placeholder="Select Category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.slice(1).map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="price">Price ($)</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        disabled={true}
+                        value={"price"}
+                        onChange={(e) =>
+                          setNewProduct({
+                            ...newProduct,
+                            price: Number(e.target.value),
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="quantity">Quantity</Label>
+                      <Input
+                        id="quantity"
+                        type="number"
+                        step="0.01"
+                        value={"inventoryQuantity"}
+                        onChange={(e) => setInventoryQuantity(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="expiry">Expiry Date</Label>
+                      <Input
+                        id="expiry"
+                        type="date"
+                        value={"inventoryExpiry"}
+                        // onChange={(e) => setInventoryExpiry(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                    // onClick={handleAddInventory}
+                  >
+                    Add Product
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
     </div>
-  )
+  );
 }
 
 function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
@@ -795,7 +1062,7 @@ function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
       <circle cx="19" cy="12" r="1" />
       <circle cx="5" cy="12" r="1" />
     </svg>
-  )
+  );
 }
 
 function Minus(props: React.SVGProps<SVGSVGElement>) {
@@ -814,5 +1081,5 @@ function Minus(props: React.SVGProps<SVGSVGElement>) {
     >
       <path d="M5 12h14" />
     </svg>
-  )
+  );
 }

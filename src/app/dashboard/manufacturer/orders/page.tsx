@@ -3,11 +3,15 @@
 import { useState } from "react";
 import {
   ArrowUpDown,
+  BarChart3,
   Check,
   ChevronDown,
+  ClipboardList,
   Clock,
   Download,
   Filter,
+  LayoutDashboard,
+  Package,
   Search,
   Truck,
   X,
@@ -57,6 +61,7 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import Link from "next/link";
 
 // Sample orders data
 const ordersData = [
@@ -233,7 +238,48 @@ export default function OrdersPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Order Management</h1>
+      <div className="mb-2 flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer"
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/analytics"
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Analytics</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/orders"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Orders</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/inventory"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Inventory</span>
+          </Link>
+        </Button>
+      </div>
+      <h1 className="text-3xl font-bold tracking-tight absolute top-4 left-1/2 transform -translate-x-1/2 text-center">
+  Order Management
+</h1>
+
         <div className="flex items-center gap-2">
           <Button variant="outline" className="flex items-center gap-2">
             <Download className="h-4 w-4" />
