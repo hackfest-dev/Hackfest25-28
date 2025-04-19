@@ -17,8 +17,12 @@ import {
 } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import Link from "next/link";
+import { api } from "~/trpc/react";
 
 export default function ManufacturerDashboard() {
+  const dat = api.dashboard.getManufacturerTotalRevenue.useQuery({
+    manufacturerId: 1,
+  });
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-3xl font-bold tracking-tight">
@@ -87,7 +91,14 @@ export default function ManufacturerDashboard() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$245,231.89</div>
+            <div className="text-2xl font-bold">
+              {dat.isLoading
+                ? "Loading..."
+                : dat.isError
+                  ? "Error"
+                  : `$${dat.data}`}
+            </div>
+
             <p className="text-muted-foreground text-xs">
               +15.3% from last month
             </p>

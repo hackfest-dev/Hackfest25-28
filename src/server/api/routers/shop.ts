@@ -1,9 +1,5 @@
 import { z } from "zod";
-import {
-  createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "../trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../trpc";
 
 export const shopRouter = createTRPCRouter({
   // Shopkeeper CRUD
@@ -14,7 +10,7 @@ export const shopRouter = createTRPCRouter({
         categories: z.string().array(),
         rating: z.number(),
         deliveryTime: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const shopkeeper = await ctx.db.shopkeeper.create({
@@ -48,7 +44,7 @@ export const shopRouter = createTRPCRouter({
         categories: z.string().array().optional(),
         rating: z.number().optional(),
         deliveryTime: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const shopkeeper = await ctx.db.shopkeeper.update({
@@ -76,11 +72,11 @@ export const shopRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string(),
-      brand: z.string(),
+        brand: z.string(),
         shopkeeperId: z.number(),
         price: z.number(),
         category: z.string(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const shopItem = await ctx.db.shopItem.create({
@@ -95,34 +91,34 @@ export const shopRouter = createTRPCRouter({
       const inventory = await ctx.db.inventory.create({
         data: {
           quantity: 0,
-          shopItem: { 
-            connect:{
-              id: shopItem.id
-            }
-          }
-        }
-    })
-    await ctx.db.shopItem.update({
-      where:{
-        id: shopItem.id
-      },
-      data:{
-        inventoryId: inventory.id
-      }
-    })
-  }),
+          shopItem: {
+            connect: {
+              id: shopItem.id,
+            },
+          },
+        },
+      });
+      await ctx.db.shopItem.update({
+        where: {
+          id: shopItem.id,
+        },
+        data: {
+          inventoryId: inventory.id,
+        },
+      });
+    }),
   getShopItems: publicProcedure
     .input(z.object({ shopkeeperid: z.number() }))
     .query(async ({ input, ctx }) => {
       const shopItems = await ctx.db.shopItem.findMany({
         where: { shopkeeperId: input.shopkeeperid },
-        include:{
+        include: {
           shopkeeper: true,
           inventory: true,
           billItem: true,
-        }
+        },
       });
-      if(!shopItems) {
+      if (!shopItems) {
         return null;
       }
       return shopItems;
@@ -192,7 +188,7 @@ export const shopRouter = createTRPCRouter({
         id: z.number(),
         skuId: z.number().optional(),
         quantity: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const inventory = await ctx.db.inventory.update({
@@ -220,7 +216,7 @@ export const shopRouter = createTRPCRouter({
         inventoryId: z.number(),
         batchId: z.number().optional(),
         quantity: z.number(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const inventoryBatch = await ctx.db.inventoryBatch.create({
@@ -251,7 +247,7 @@ export const shopRouter = createTRPCRouter({
         inventoryId: z.number().optional(),
         batchId: z.number().optional(),
         quantity: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const inventoryBatch = await ctx.db.inventoryBatch.update({
@@ -283,7 +279,7 @@ export const shopRouter = createTRPCRouter({
         invoice: z.string().optional(),
         invoiceDate: z.date(),
         customerId: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const billing = await ctx.db.billing.create({
@@ -321,7 +317,7 @@ export const shopRouter = createTRPCRouter({
         invoice: z.string().optional(),
         invoiceDate: z.date().optional(),
         customerId: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const billing = await ctx.db.billing.update({
@@ -355,7 +351,7 @@ export const shopRouter = createTRPCRouter({
         quantity: z.number(),
         price: z.number(),
         totalPrice: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const billItem = await ctx.db.billItem.create({
@@ -390,7 +386,7 @@ export const shopRouter = createTRPCRouter({
         quantity: z.number().optional(),
         price: z.number().optional(),
         totalPrice: z.number().optional(),
-      })
+      }),
     )
     .mutation(async ({ input, ctx }) => {
       const billItem = await ctx.db.billItem.update({
@@ -405,7 +401,7 @@ export const shopRouter = createTRPCRouter({
       });
       return billItem;
     }),
-    deleteBillItem: publicProcedure
+  deleteBillItem: publicProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.billItem.delete({
@@ -413,5 +409,4 @@ export const shopRouter = createTRPCRouter({
       });
       return { success: true };
     }),
-
 });
