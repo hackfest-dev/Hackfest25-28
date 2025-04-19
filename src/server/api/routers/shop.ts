@@ -114,6 +114,9 @@ export const shopRouter = createTRPCRouter({
           billItem: true,
         }
       });
+      if(!shopItems) {
+        return null;
+      }
       return shopItems;
     }),
   // updateShopItem: publicProcedure
