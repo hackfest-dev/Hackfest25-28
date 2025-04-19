@@ -7,6 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Define user roles enum
+enum UserRole {
+  CUSTOMER
+  MIDDLEMAN
+  SHOPKEEPER
+  MANUFACTURER
+  ADMIN
+}
+
 model Manufacturer {
   id                Int                @id @default(autoincrement())
   name              String
@@ -14,9 +23,11 @@ model Manufacturer {
   categories        String[]
   rating            Float
   deliveryTime      String
+  userId            String?            @unique // Link to User model
   orders            Order[]
   middleMenRelation middleMenRelation?
   products          myProduct[]
+  user              User?              @relation(fields: [userId], references: [id])
 }
 
 model myProduct {
@@ -77,7 +88,9 @@ model middleMen {
   categories        String[]
   rating            Float
   deliveryTime      String
+  userId            String?             @unique // Link to User model
   middleMenRelation middleMenRelation[]
+  user              User?               @relation(fields: [userId], references: [id])
 }
 
 model middleMenRelation {
@@ -97,9 +110,11 @@ model shopkeeper {
   categories   String[]
   rating       Float
   deliveryTime String
+  userId       String?    @unique // Link to User model
   orders       Order[]
   billing      billing[]
   shopItem     shopItem[]
+  user         User?      @relation(fields: [userId], references: [id])
 }
 
 model shopItem {
@@ -130,7 +145,6 @@ model InventoryBatch {
   inventoryId Int
   batchId     Int?
   expiryDate  DateTime? @db.Date
-
   quantity    Int
   batch       batches?  @relation(fields: [batchId], references: [id])
   inventory   inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
@@ -165,7 +179,9 @@ model customer {
   name    String
   mobile  String    @unique
   tier    String    @default("Bronze")
+  userId  String?   @unique // Link to User model
   billing billing[]
+  user    User?     @relation(fields: [userId], references: [id])
 }
 
 model Account {
@@ -207,14 +223,19 @@ model Post {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String        @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?       @unique
   emailVerified DateTime?
   image         String?
+  role          UserRole?     // User role
   accounts      Account[]
   posts         Post[]
   sessions      Session[]
+  manufacturer  Manufacturer?
+  middleMen     middleMen?
+  shopkeeper    shopkeeper?
+  customer      customer?
 }
 
 model VerificationToken {
