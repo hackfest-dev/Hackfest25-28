@@ -11,13 +11,15 @@ import {
 export default function ShopkeeperDashboard() {
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+      <div >
+        <div className=" absolute top-4 left-1/2 transform -translate-x-1/2 text-center">
+        <h1 className="text-3xl  tracking-tight">
           Shopkeeper Dashboard
         </h1>
         <p className="text-muted-foreground mt-1">
           Welcome back! Select a module to manage your retail operations.
-        </p>
+        </p></div>
+        <br /><br /><br /><br /><br /><br />
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
