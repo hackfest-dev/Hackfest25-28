@@ -102,6 +102,14 @@ export const shopRouter = createTRPCRouter({
           }
         }
     })
+    await ctx.db.shopItem.update({
+      where:{
+        id: shopItem.id
+      },
+      data:{
+        inventoryId: inventory.id
+      }
+    })
   }),
   getShopItems: publicProcedure
     .input(z.object({ shopkeeperid: z.number() }))
