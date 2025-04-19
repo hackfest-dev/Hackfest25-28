@@ -127,8 +127,9 @@ model shopItem {
   shopkeeperId  Int
   shopkeeper    shopkeeper @relation(fields: [shopkeeperId], references: [id])
   name          String
+  category      String
   brand         String
-  inventoryId Int @unique
+  inventoryId Int? @unique
   inventory     inventory?     
   price         Float
 
