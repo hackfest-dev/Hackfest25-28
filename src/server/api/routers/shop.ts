@@ -225,12 +225,8 @@ export const shopRouter = createTRPCRouter({
       z.object({
         inventoryId: z.number(),
         quantity: z.number(),
-<<<<<<< HEAD
-      }),
-=======
         expiryDate: z.date().optional(),
       })
->>>>>>> cf7d38ebd93056995f70f0ae57574a6e05268bdd
     )
     .mutation(async ({ input, ctx }) => {
       const inventoryBatch = await ctx.db.inventoryBatch.create({
