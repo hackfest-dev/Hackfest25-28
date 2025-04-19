@@ -1,215 +1,138 @@
+import Link from "next/link";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { BarChart, LineChart, PieChart } from "lucide-react";
+  ReceiptText,
+  BarChart2,
+  Package,
+  Store,
+  BadgePercent,
+  ArrowRight,
+} from "lucide-react";
 
 export default function ShopkeeperDashboard() {
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-3xl font-bold tracking-tight">
-        Shopkeeper Dashboard
-      </h1>
-      <p className="text-muted-foreground">
-        Welcome back! Here's an overview of your store's performance.
-      </p>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="text-muted-foreground h-4 w-4"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
-            <p className="text-muted-foreground text-xs">
-              +20.1% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales</CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="text-muted-foreground h-4 w-4"
-            >
-              <rect width="20" height="14" x="2" y="5" rx="2" />
-              <path d="M2 10h20" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-muted-foreground text-xs">
-              +19% from last month
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Active Customers
-            </CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="text-muted-foreground h-4 w-4"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+573</div>
-            <p className="text-muted-foreground text-xs">
-              +201 since last week
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Inventory Items
-            </CardTitle>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              className="text-muted-foreground h-4 w-4"
-            >
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-            </svg>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">1,324</div>
-            <p className="text-muted-foreground text-xs">
-              +24 new items this month
-            </p>
-          </CardContent>
-        </Card>
+    <div className="flex flex-col gap-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">
+          Shopkeeper Dashboard
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Welcome back! Select a module to manage your retail operations.
+        </p>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <BarChart className="h-4 w-4" />
-            Overview
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <LineChart className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="flex items-center gap-2">
-            <PieChart className="h-4 w-4" />
-            Reports
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
-              <CardHeader>
-                <CardTitle>Sales Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <div className="bg-muted/20 text-muted-foreground flex h-[200px] w-full items-center justify-center rounded-md">
-                  Sales Chart Placeholder
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="col-span-3">
-              <CardHeader>
-                <CardTitle>Top Products</CardTitle>
-                <CardDescription>
-                  Your best-selling products this month
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {["Product A", "Product B", "Product C", "Product D"].map(
-                    (product, i) => (
-                      <div key={product} className="flex items-center">
-                        <div className="bg-muted mr-4 flex h-[46px] w-[46px] items-center justify-center rounded">
-                          {i + 1}
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-sm leading-none font-medium">
-                            {product}
-                          </p>
-                          <p className="text-muted-foreground text-sm">
-                            ${Math.floor(Math.random() * 1000) + 100}.00
-                          </p>
-                        </div>
-                        <div className="ml-auto font-medium">
-                          +{Math.floor(Math.random() * 100) + 10}%
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Billing Module */}
+        <Link
+          href="/dashboard/shopkeeper/billing"
+          className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-emerald-200 hover:bg-emerald-50/50 hover:shadow-md dark:hover:bg-emerald-950/10"
+        >
+          <div className="flex flex-1 flex-col p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-400">
+                <ReceiptText className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">Billing</h3>
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm">
+              Create invoices, manage transactions, and process customer
+              payments
+            </p>
+            <div className="mt-auto flex items-center pt-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+              Open Billing
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
           </div>
-        </TabsContent>
-        <TabsContent value="analytics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Advanced Analytics</CardTitle>
-              <CardDescription>
-                Detailed performance metrics for your store
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted/20 text-muted-foreground flex h-[300px] w-full items-center justify-center rounded-md">
-                Analytics Dashboard Placeholder
+        </Link>
+
+        {/* Analytics Module */}
+        <Link
+          href="/dashboard/shopkeeper/analytics"
+          className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-blue-200 hover:bg-blue-50/50 hover:shadow-md dark:hover:bg-blue-950/10"
+        >
+          <div className="flex flex-1 flex-col p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400">
+                <BarChart2 className="h-6 w-6" />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="reports" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports</CardTitle>
-              <CardDescription>
-                Generate and view custom reports
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted/20 text-muted-foreground flex h-[300px] w-full items-center justify-center rounded-md">
-                Reports Dashboard Placeholder
+              <h3 className="text-xl font-semibold">Analytics</h3>
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm">
+              View sales trends, product performance, and business insights
+            </p>
+            <div className="mt-auto flex items-center pt-4 text-sm font-medium text-blue-600 dark:text-blue-400">
+              Open Analytics
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Inventory Module */}
+        <Link
+          href="/dashboard/shopkeeper/inventory"
+          className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-purple-200 hover:bg-purple-50/50 hover:shadow-md dark:hover:bg-purple-950/10"
+        >
+          <div className="flex flex-1 flex-col p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-400">
+                <Package className="h-6 w-6" />
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+              <h3 className="text-xl font-semibold">Inventory</h3>
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm">
+              Manage stock levels, track products, and handle inventory
+              operations
+            </p>
+            <div className="mt-auto flex items-center pt-4 text-sm font-medium text-purple-600 dark:text-purple-400">
+              Open Inventory
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Manufacturers Module */}
+        <Link
+          href="/dashboard/shopkeeper/manufacturers"
+          className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-amber-200 hover:bg-amber-50/50 hover:shadow-md dark:hover:bg-amber-950/10"
+        >
+          <div className="flex flex-1 flex-col p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400">
+                <Store className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">Manufacturers</h3>
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm">
+              Browse products from manufacturers and place orders for your store
+            </p>
+            <div className="mt-auto flex items-center pt-4 text-sm font-medium text-amber-600 dark:text-amber-400">
+              Open Manufacturers
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+
+        {/* Loyalty Module */}
+        <Link
+          href="/dashboard/shopkeeper/loyalty"
+          className="group bg-card text-card-foreground flex h-[180px] flex-col overflow-hidden rounded-xl border shadow transition-all hover:border-rose-200 hover:bg-rose-50/50 hover:shadow-md dark:hover:bg-rose-950/10"
+        >
+          <div className="flex flex-1 flex-col p-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-400">
+                <BadgePercent className="h-6 w-6" />
+              </div>
+              <h3 className="text-xl font-semibold">Loyalty</h3>
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm">
+              Manage customer loyalty programs, rewards, and member benefits
+            </p>
+            <div className="mt-auto flex items-center pt-4 text-sm font-medium text-rose-600 dark:text-rose-400">
+              Open Loyalty
+              <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </div>
+          </div>
+        </Link>
+      </div>
     </div>
   );
 }
