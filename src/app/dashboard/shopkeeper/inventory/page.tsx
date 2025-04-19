@@ -175,6 +175,7 @@ export default function InventoryPage() {
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     brand: "",
@@ -276,7 +277,7 @@ export default function InventoryPage() {
           </Button>
           <Button
               className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleAddInventory}
+              onClick={()=>setShowAddInventoryDialog(true)}
             >
             <Plus className="mr-2 h-4 w-4" />  Add Items to Inventory
             </Button>
@@ -313,7 +314,7 @@ export default function InventoryPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Product Inventory</CardTitle>
-          <CardDescription>Manage your store's inventory</CardDescription>
+          <CardDescription>Manage your store&apos;s inventory</CardDescription>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
@@ -712,6 +713,94 @@ export default function InventoryPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+            <DialogDescription>
+              Enter the details of the new product to add to inventory.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Product Name</Label>
+                <Input
+                  id="name"
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brand">Brand</Label>
+                <Input
+                  id="brand"
+                  value={newProduct.brand}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, brand: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={newProduct.category}
+                  onValueChange={(value) =>
+                    setNewProduct({ ...newProduct, category: value })
+                  }
+                >
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.slice(1).map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+           
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={newProduct.price}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      price: Number(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              
+            </div>
+           
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAddProduct}
+            >
+              Add Product
+            </Button>
+            
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       
     </div>
   );
@@ -738,21 +827,4 @@ function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function Minus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-    </svg>
-  );
-}
+
