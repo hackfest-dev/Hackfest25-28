@@ -225,18 +225,18 @@ export default function ManufacturerInventoryPage() {
 
   // Add new product
   const handleAddProduct = () => {
-    addSku({
-      skuId: newProduct.sku,
-      prodName: newProduct.name,
-      category: newProduct.category,
-      minorder: newProduct.minorder,
-      price: newProduct.price,
-      maid: 1
-    }, {
-      onSuccess:{
-        void getSkus();
-      }
-    });
+    // addSku({
+    //   skuId: newProduct.sku,
+    //   prodName: newProduct.name,
+    //   category: newProduct.category,
+    //   minorder: newProduct.minorder,
+    //   price: newProduct.price,
+    //   maid: 1
+    // }, {
+    //   onSuccess:{
+    //     void getSkus();
+    //   }
+    // });
     
     setShowAddDialog(false)
     setNewProduct({
@@ -452,7 +452,7 @@ export default function ManufacturerInventoryPage() {
                   <TableHead>Expiry Date</TableHead>
                   <TableHead>Location</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-right">View inventory</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -517,27 +517,9 @@ export default function ManufacturerInventoryPage() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
+                              
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>Edit Product</DropdownMenuItem>
-                              <DropdownMenuItem>View History</DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => handleDeleteProduct(item.id)}
-                              >
-                                Delete Product
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
+                            <Button key={item.id} onClick={()=>alert(`view triggred ${item.id}`)}>View</Button>
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>

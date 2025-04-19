@@ -15,6 +15,7 @@ import {
   Plus,
   Search,
   Upload,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -63,6 +64,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { api } from "~/trpc/react";
+import InventoryDetails from "~/app/_components/InventoryDetails";
 
 // Sample inventory data
 
@@ -218,6 +220,8 @@ export default function InventoryPage() {
     expiry: "",
     barcode: "",
   });
+  const [selectedInventory, setSelectedInventory] = useState<any>(null);
+  const [showInventoryDetails, setShowInventoryDetails] = useState(false);
 
   // const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
   const { data: getShopItems, refetch: fetchShopItems } =
@@ -334,6 +338,11 @@ export default function InventoryPage() {
     setInventory(
       inventory.map((item) => (item.id === id ? { ...item, quantity } : item)),
     );
+  };
+
+  const handleViewInventory = (item: any) => {
+    setSelectedInventory(item);
+    setShowInventoryDetails(true);
   };
 
   return (
@@ -541,7 +550,9 @@ export default function InventoryPage() {
                             >
                               Delete Product
                             </DropdownMenuItem>
-                            <DropdownMenuItem>View Product</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewInventory(item)}>
+                              View Product
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -942,27 +953,14 @@ export default function InventoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
 
-function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="19" cy="12" r="1" />
-      <circle cx="5" cy="12" r="1" />
-    </svg>
+      <Dialog open={showInventoryDetails} onOpenChange={setShowInventoryDetails}>
+        <DialogContent>
+          {selectedInventory && (
+            <InventoryDetails inventory={selectedInventory} />
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
