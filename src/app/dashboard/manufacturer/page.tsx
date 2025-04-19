@@ -25,15 +25,6 @@ export default function ManufacturerDashboard() {
   // });
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-3xl font-bold tracking-tight">
-        Manufacturer Dashboard
-      </h1>
-      <p className="text-muted-foreground">
-        Welcome back! Here's an overview of your products' performance across
-        retailers.
-      </p>
-
-      {/* Navigation Buttons */}
       <div className="mb-2 flex flex-wrap gap-3">
         <Button asChild variant="outline" className="h-10 px-4 py-2">
           <Link
@@ -73,6 +64,16 @@ export default function ManufacturerDashboard() {
         </Button>
       </div>
 
+      <h1 className="text-3xl font-bold tracking-tight absolute top-4 left-1/2 transform -translate-x-1/2 text-center">
+        Manufacturer Dashboard
+      </h1>
+      <p className="text-muted-foreground">
+        Welcome back! Here's an overview of your products' performance across
+        retailers.
+      </p>
+
+      {/* Navigation Buttons */}
+      
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

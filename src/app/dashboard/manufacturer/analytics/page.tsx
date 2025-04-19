@@ -11,6 +11,9 @@ import {
   ShoppingCart,
   Clock,
   BarChart2,
+  LayoutDashboard,
+  BarChart3,
+  ClipboardList,
 } from "lucide-react";
 import {
   Card,
@@ -41,6 +44,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Progress } from "~/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import Link from "next/link";
 
 // Sample data for SKUs
 const skuData = [
@@ -267,6 +271,45 @@ export default function LiveRetailVisibilityPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+
+      <div className="mb-2 flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer"
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/analytics"
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Analytics</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/orders"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Orders</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/inventory"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Inventory</span>
+          </Link>
+        </Button>
+      </div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             Live Retail Visibility

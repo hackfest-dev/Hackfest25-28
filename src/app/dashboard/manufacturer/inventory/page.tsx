@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { AlertCircle, ArrowUpDown, Download, Filter, Plus, Search, Upload } from "lucide-react"
+import { AlertCircle, ArrowUpDown, BarChart3, ClipboardList, Download, Filter, LayoutDashboard, Package, Plus, Search, Upload } from "lucide-react"
 
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "~/components/ui/card"
@@ -30,6 +30,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert"
+import Link from "next/link"
 
 // Sample inventory data
 const inventoryData = [
@@ -221,6 +222,44 @@ export default function ManufacturerInventoryPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <div className="mb-2 flex flex-wrap gap-3">
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer"
+            className="flex items-center gap-2"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/analytics"
+            className="flex items-center gap-2"
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>Analytics</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/orders"
+            className="flex items-center gap-2"
+          >
+            <ClipboardList className="h-4 w-4" />
+            <span>Orders</span>
+          </Link>
+        </Button>
+        <Button asChild variant="outline" className="h-10 px-4 py-2">
+          <Link
+            href="/dashboard/manufacturer/inventory"
+            className="flex items-center gap-2"
+          >
+            <Package className="h-4 w-4" />
+            <span>Inventory</span>
+          </Link>
+        </Button>
+      </div>
         <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" className="flex items-center gap-2">
