@@ -191,12 +191,24 @@ const categories = [
 export default function InventoryPage() {
   const [inventory, setInventory] = useState(inventoryData);
   const [searchTerm, setSearchTerm] = useState("");
-  const [shopItems, setShopItems] = useState<shopItem[]>([]);
+  const [inventoryQuantity, setInventoryQuantity] = useState(0);
+  const [inventoryItem, setInventoryItem] = useState<shopItemType>({
+    id: 0,
+    name: "",
+    brand: "",
+    category: "",
+    price: 0,
+    inventoryId: 0,
+    shopkeeperId: 0, // Add the missing property with a default value
+  });
+  const [shopItems, setShopItems] = useState<shopItemType[]>([]);
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
+  const {mutate: addInventoryItem} = api.shopkeeper.createInventoryBatch.useMutation();
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
   const [searchEvent,setSearchEvent] = useState(false)
+  const [inventoryExpiry, setInventoryExpiry] = useState("");
   const [newProduct, setNewProduct] = useState({
     name: "",
     brand: "",
@@ -219,6 +231,7 @@ export default function InventoryPage() {
       id: item2.id,
       name: item2.name,
       brand: item2.brand,
+      inventoryId: item2.inventoryId,
       price: item2.price,
       category: item2.category,
       quantity: item2.inventory?.quantity,
@@ -278,7 +291,24 @@ export default function InventoryPage() {
     // });
 
   const handleAddInventory =async () => {
+    addInventoryItem({
+      inventoryId: Number(inventoryItem?.inventoryId),
+      quantity: inventoryQuantity
+    });
 
+    setShowAddInventoryDialog(false);
+    setInventoryItem({
+      id: 0,
+      name: "",
+      brand: "",
+      category: "",
+      price: 0,
+      inventoryId: 0,
+      shopkeeperId: 0, 
+    });
+
+    setInventoryQuantity(0);
+    setInventoryExpiry("");
 
     // setShowAddDialog(false);
     // setNewProduct({
@@ -774,7 +804,7 @@ export default function InventoryPage() {
       <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>Add Items to Inventory</DialogTitle>
             <DialogDescription>
               Enter the details of the new product to add to inventory.
             </DialogDescription>
@@ -803,7 +833,7 @@ export default function InventoryPage() {
           </TableRow>
         ) : (
           filteredInventory?.map((item) => (
-            <TableRow key={item.id}>
+            <TableRow key={item.id} onClick={() => setInventoryItem({ ...item, shopkeeperId: 1, inventoryId: item.inventoryId })}>
               <TableCell className="font-medium">{item.name}</TableCell>
               <TableCell>{item.brand}</TableCell>
               <TableCell>{item.category}</TableCell>
@@ -824,7 +854,8 @@ export default function InventoryPage() {
                 <Label htmlFor="name">Product Name</Label>
                 <Input
                   id="name"
-                  value={newProduct.name}
+                  value={inventoryItem?.name}
+                  disabled={true}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, name: e.target.value })
                   }
@@ -834,7 +865,8 @@ export default function InventoryPage() {
                 <Label htmlFor="brand">Brand</Label>
                 <Input
                   id="brand"
-                  value={newProduct.brand}
+                  value={inventoryItem?.brand}
+                  disabled={true}
                   onChange={(e) =>
                     setNewProduct({ ...newProduct, brand: e.target.value })
                   }
@@ -845,7 +877,8 @@ export default function InventoryPage() {
               <div className="space-y-2">
                 <Label htmlFor="category">Category</Label>
                 <Select
-                  value={newProduct.category}
+                disabled={true}
+                  value={inventoryItem?.category}
                   onValueChange={(value) =>
                     setNewProduct({ ...newProduct, category: value })
                   }
@@ -871,7 +904,8 @@ export default function InventoryPage() {
                   id="price"
                   type="number"
                   step="0.01"
-                  value={newProduct.price}
+                  disabled={true}
+                  value={inventoryItem?.price}
                   onChange={(e) =>
                     setNewProduct({
                       ...newProduct,
@@ -880,8 +914,36 @@ export default function InventoryPage() {
                   }
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="quantity">Quantity</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  step="0.01"
+                  value={inventoryQuantity}
+                  onChange={(e) =>
+                    setInventoryQuantity(
+                      Number(e.target.value)
+                )
+                  }
+                />
+              </div>
               
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiry">Expiry Date</Label>
+                <Input
+                  id="expiry"
+                  type="date"
+                  value={inventoryExpiry}
+                  onChange={(e) =>
+                    setInventoryExpiry(e.target.value)
+                  }
+                />
+              </div>
+             
+</div>
            
           </div>
           <DialogFooter>
@@ -890,7 +952,7 @@ export default function InventoryPage() {
             </Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700"
-              onClick={handleAddProduct}
+              onClick={handleAddInventory}
             >
               Add Product
             </Button>
