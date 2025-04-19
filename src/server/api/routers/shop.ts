@@ -283,9 +283,12 @@ export const shopRouter = createTRPCRouter({
         invoice: z.string().optional(),
         invoiceDate: z.date(),
         customerId: z.number().optional(),
+        quantity:z.number()
       })
     )
     .mutation(async ({ input, ctx }) => {
+
+      
       const billing = await ctx.db.billing.create({
         data: {
           shopkeeperId: input.shopkeeperId,
@@ -294,6 +297,17 @@ export const shopRouter = createTRPCRouter({
           invoice: input.invoice,
           invoiceDate: input.invoiceDate,
           customerId: input.customerId,
+          
+        },
+      });
+
+      const billItem = await ctx.db.billItem.create({
+        data: {
+          billingId: billing.id,
+          shopitemId: input.shopkeeperId,
+          quantity: 2,
+          price: input.amount,
+          totalPrice: input.amount * input.quantity,
         },
       });
       return billing;
