@@ -151,6 +151,7 @@ model InventoryBatch {
   id          Int       @id @default(autoincrement())
   inventoryId Int
   batchId     Int?
+  expiryDate  DateTime? @db.Date
 
   inventory   inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   batch       batches?   @relation(fields: [batchId], references: [id])

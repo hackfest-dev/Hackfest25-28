@@ -214,16 +214,20 @@ export const shopRouter = createTRPCRouter({
     .input(
       z.object({
         inventoryId: z.number(),
-        batchId: z.number().optional(),
         quantity: z.number(),
+<<<<<<< HEAD
       }),
+=======
+        expiryDate: z.date().optional(),
+      })
+>>>>>>> cf7d38ebd93056995f70f0ae57574a6e05268bdd
     )
     .mutation(async ({ input, ctx }) => {
       const inventoryBatch = await ctx.db.inventoryBatch.create({
         data: {
           inventoryId: input.inventoryId,
-          batchId: input.batchId,
           quantity: input.quantity,
+          expiryDate: input.expiryDate,
         },
       });
       return inventoryBatch;
@@ -234,7 +238,7 @@ export const shopRouter = createTRPCRouter({
       const inventoryBatch = await ctx.db.inventoryBatch.findUnique({
         where: { id: input.id },
         include: {
-          inventory: true,
+          inventory: true,// Add the missing property with a default value
           batch: true,
         },
       });
