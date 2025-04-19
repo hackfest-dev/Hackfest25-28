@@ -278,8 +278,8 @@ export default function InventoryPage() {
     // });
 
   const handleAddInventory =async () => {
-    // const id = Math.max(...inventory.map((item) => item.id)) + 1;
-    // setInventory([...inventory, { id, ...newProduct }]);
+
+
     // setShowAddDialog(false);
     // setNewProduct({
     //   name: "",
