@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { useState } from "react";
-import { api } from "~/trpc/react"; 
+
 import {
   AlertCircle,
   ArrowUpDown,
@@ -61,8 +61,11 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { api } from "~/trpc/react";
+
 
 // Sample inventory data
+
 const inventoryData = [
   {
     id: 1,
@@ -176,6 +179,7 @@ export default function InventoryPage() {
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
+  const [searchEvent,setSearchEvent] = useState(false)
   const [newProduct, setNewProduct] = useState({
     name: "",
     brand: "",
@@ -186,7 +190,8 @@ export default function InventoryPage() {
     barcode: "",
   });
 
-  const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  // const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  const getInventory = api.shopkeeper.getShopItems.useQuery({shopkeeperid:1})
   // const addProduct = api.shopkeeper.
     
 
@@ -203,7 +208,7 @@ export default function InventoryPage() {
 
   // Get low stock items (quantity < 5)
   const lowStockItems = inventory.filter((item) => item.quantity < 5);
-
+  console.log(getInventory.data)
   // Get expired or soon to expire items (within 7 days)
   const today = new Date();
   const sevenDaysLater = new Date(today);
@@ -323,7 +328,11 @@ export default function InventoryPage() {
                 placeholder="Search by name, brand, or barcode..."
                 className="pl-8"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onSelect={(e)=>setSearchEvent(true)}
+                onChange={(e) => {setSearchTerm(e.target.value);}
+              
+              
+              }
               />
             </div>
             <div className="flex gap-2">
@@ -358,7 +367,10 @@ export default function InventoryPage() {
                 <Filter className="h-4 w-4" />
                 <span className="sr-only">Filter</span>
               </Button>
-            </div>
+            </div>  
+
+
+          
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -386,7 +398,7 @@ export default function InventoryPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredInventory.length === 0 ? (
+              {/* {filteredInventory.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={8}
@@ -468,7 +480,11 @@ export default function InventoryPage() {
                     </TableRow>
                   );
                 })
-              )}
+              )} */}
+              {getInventory.data?.length && <div>
+                 {JSON.stringify(getInventory.data)}
+                {/* {getInventory.data.map((item)=>{console.log(item)})} */}  
+                </div>}
             </TableBody>
           </Table>
         </CardContent>
@@ -722,6 +738,45 @@ export default function InventoryPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+          <div className="relative flex-1 overflow-y-auto ">
+              <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+              <Input
+                type="search"
+                placeholder="Search by name, brand, or barcode..."
+                className="pl-8"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+             <div className="max-h-64 overflow-y-auto border rounded-md">
+    <table className="w-full text-sm">
+      <TableBody>
+        {filteredInventory.length === 0 ? (
+          <TableRow>
+            <TableCell
+              colSpan={8}
+              className="text-muted-foreground py-4 text-center"
+            >
+              No products found. Try a different search term or filter.
+            </TableCell>
+          </TableRow>
+        ) : (
+          filteredInventory.map((item) => (
+            <TableRow key={item.id}>
+              <TableCell className="font-medium">{item.name}</TableCell>
+              <TableCell>{item.brand}</TableCell>
+              <TableCell>{item.category}</TableCell>
+              <TableCell className="text-right">
+                <div className="flex items-center justify-end gap-2">
+                  {/* Action buttons or info */}
+                </div>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </table>
+  </div>
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Product Name</Label>
