@@ -102,16 +102,9 @@ export const shopRouter = createTRPCRouter({
   getShopItems: publicProcedure
     .input(z.object({ shopkeeperid: z.number() }))
     .query(async ({ input, ctx }) => {
-<<<<<<< Updated upstream
       const shopItems = await ctx.db.shopItem.findMany({
         where: { shopkeeperId: input.shopkeeperid },
         include:{
-=======
-    //   const   
-      const shopItem = await ctx.db.shopItem.findUnique({
-        where: { id: input.id },
-        include: {
->>>>>>> Stashed changes
           shopkeeper: true,
           inventory: true,
           billItem: true,
