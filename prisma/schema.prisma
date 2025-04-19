@@ -129,8 +129,7 @@ model shopItem {
   name          String
   brand         String
   inventoryId Int @unique
-  inventory      inventory   @relation(fields: [inventoryId], references: [id])
-
+  inventory     inventory?     
   price         Float
 
 
@@ -141,9 +140,9 @@ model inventory {
   id            Int     @id @default(autoincrement())
   skuId     Int?
   quantity      Int
-  product       myProduct? @relation(fields: [skuId], references: [id])
-
-  shopItem        shopItem? 
+    shopItemId    Int          @unique
+  product       myProduct? @relation(fields: [skuId], references: [id], onDelete: Cascade)
+   shopItem      shopItem     @relation(fields: [shopItemId], references: [id], onDelete: Cascade)
 inventoryBatches InventoryBatch[]
 }
 
@@ -152,7 +151,7 @@ model InventoryBatch {
   inventoryId Int
   batchId     Int?
 
-  inventory   inventory @relation(fields: [inventoryId], references: [id])
+  inventory   inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
   batch       batches?   @relation(fields: [batchId], references: [id])
   quantity    Int
 }

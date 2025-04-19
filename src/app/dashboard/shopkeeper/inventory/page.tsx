@@ -175,6 +175,7 @@ export default function InventoryPage() {
   const [selectedBrand, setSelectedBrand] = useState("All Brands");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAddInventoryDialog, setShowAddInventoryDialog] = useState(false);
   const [newProduct, setNewProduct] = useState({
     name: "",
     brand: "",
@@ -185,7 +186,9 @@ export default function InventoryPage() {
     barcode: "",
   });
 
-    const fetchInventory = api.shopkeeper.getInventory;
+  const fetchInventory = api.shopkeeper.getInventory.useQuery({id:1});
+  // const addProduct = api.shopkeeper.
+    
 
   // Filter inventory based on search term, brand, and category
   const filteredInventory = inventory.filter(
@@ -222,10 +225,22 @@ export default function InventoryPage() {
     //   expiry: "",
     //   barcode: "",
     // });
-    console.log(fetchInventory.useQuery({id:1}))
+    console.log(fetchInventory.data)
     
   };
+  const handleAddInventory =async () => {
+    // const id = Math.max(...inventory.map((item) => item.id)) + 1;
+    // setInventory([...inventory, { id, ...newProduct }]);
+    // setShowAddDialog(false);
+    // setNewProduct({
+    //   name: "",
 
+    //   expiry: "",
+    //   barcode: "",
+    // });
+    console.log(fetchInventory.data)
+    
+  };
   // Delete product
   const handleDeleteProduct = (id: number) => {
     setInventory(inventory.filter((item) => item.id !== id));
@@ -260,6 +275,12 @@ export default function InventoryPage() {
           >
             <Plus className="mr-2 h-4 w-4" /> Add Product
           </Button>
+          <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={()=>setShowAddInventoryDialog(true)}
+            >
+            <Plus className="mr-2 h-4 w-4" />  Add Items to Inventory
+            </Button>
         </div>
       </div>
 
@@ -293,7 +314,7 @@ export default function InventoryPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle>Product Inventory</CardTitle>
-          <CardDescription>Manage your store's inventory</CardDescription>
+          <CardDescription>Manage your store&apos;s inventory</CardDescription>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
@@ -389,17 +410,7 @@ export default function InventoryPage() {
                       <TableCell>{item.category}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity - 1)
-                            }
-                          >
-                            <Minus className="h-3 w-3" />
-                            <span className="sr-only">Decrease</span>
-                          </Button>
+                          
                           <span
                             className={
                               isLowStock ? "font-bold text-red-500" : ""
@@ -407,21 +418,11 @@ export default function InventoryPage() {
                           >
                             {item.quantity}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() =>
-                              handleUpdateQuantity(item.id, item.quantity + 1)
-                            }
-                          >
-                            <Plus className="h-3 w-3" />
-                            <span className="sr-only">Increase</span>
-                          </Button>
+                          
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        ${item.price.toFixed(2)}
+                      ₹{item.price.toFixed(2)}
                       </TableCell>
                       <TableCell>{item.expiry}</TableCell>
                       <TableCell>
@@ -675,20 +676,7 @@ export default function InventoryPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  value={newProduct.quantity}
-                  onChange={(e) =>
-                    setNewProduct({
-                      ...newProduct,
-                      quantity: Number(e.target.value),
-                    })
-                  }
-                />
-              </div>
+           
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -706,34 +694,9 @@ export default function InventoryPage() {
                   }
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="expiry">Expiry Date</Label>
-                <Input
-                  id="expiry"
-                  type="date"
-                  value={newProduct.expiry}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, expiry: e.target.value })
-                  }
-                />
-              </div>
+              
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="barcode">Barcode</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="barcode"
-                  value={newProduct.barcode}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, barcode: e.target.value })
-                  }
-                />
-                <Button variant="outline" size="icon">
-                  <BarcodeScan className="h-4 w-4" />
-                  <span className="sr-only">Scan Barcode</span>
-                </Button>
-              </div>
-            </div>
+           
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>
@@ -745,9 +708,100 @@ export default function InventoryPage() {
             >
               Add Product
             </Button>
+            
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showAddInventoryDialog} onOpenChange={setShowAddInventoryDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Product</DialogTitle>
+            <DialogDescription>
+              Enter the details of the new product to add to inventory.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Product Name</Label>
+                <Input
+                  id="name"
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brand">Brand</Label>
+                <Input
+                  id="brand"
+                  value={newProduct.brand}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, brand: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={newProduct.category}
+                  onValueChange={(value) =>
+                    setNewProduct({ ...newProduct, category: value })
+                  }
+                >
+                  <SelectTrigger id="category">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.slice(1).map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+           
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price ($)</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={newProduct.price}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      price: Number(e.target.value),
+                    })
+                  }
+                />
+              </div>
+              
+            </div>
+           
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={handleAddProduct}
+            >
+              Add Product
+            </Button>
+            
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
     </div>
   );
 }
@@ -773,21 +827,4 @@ function MoreHorizontal(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function Minus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-    </svg>
-  );
-}
+
