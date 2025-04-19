@@ -1,5 +1,8 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { type DefaultSession, type NextAuthConfig } from "next-auth";
+import {
+  type DefaultSession,
+  type NextAuthConfig,
+} from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 
 import { db } from "~/server/db";
@@ -14,15 +17,22 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
-      // role: UserRole;
+      role: "ADMIN" | "CUSTOMER" | "MIDDLEMAN" | "SHOPKEEPER" | "MANUFACTURER" | null;
+      // Role-specific IDs
+      manufacturerId?: number;
+      shopkeeperId?: number;
+      middlemanId?: number;
+      customerId?: number;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    role: "ADMIN" | "CUSTOMER" | "MIDDLEMAN" | "SHOPKEEPER" | "MANUFACTURER" | null;
+    manufacturerId?: number;
+    shopkeeperId?: number;
+    middlemanId?: number;
+    customerId?: number;
+  }
 }
 
 /**
@@ -43,24 +53,34 @@ export const authConfig = {
       },
       from: process.env.EMAIL_FROM,
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
   adapter: PrismaAdapter(db),
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+    session: async ({ session, user }) => {
+      // Fetch user with role-specific data
+      const fullUser = await db.user.findUnique({
+        where: { id: user.id },
+        include: {
+          manufacturer: true,
+          shopkeeper: true,
+          middleMen: true,
+          customer: true,
+        },
+      });
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: user.id,
+          role: fullUser?.role ?? null,
+          // Include role-specific IDs if they exist
+          manufacturerId: fullUser?.manufacturer?.id,
+          shopkeeperId: fullUser?.shopkeeper?.id,
+          middlemanId: fullUser?.middleMen?.id,
+          customerId: fullUser?.customer?.id,
+        },
+      };
+    },
   },
 } satisfies NextAuthConfig;

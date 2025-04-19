@@ -46,6 +46,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import SalesForecastChart from "~/components/dashboard/forecast";
 
 // Sample data for sales trends
 const dailySalesData = [
@@ -192,51 +193,7 @@ export default function AnalyticsPage() {
               <TabsTrigger value="weekly">Weekly</TabsTrigger>
             </TabsList>
             <TabsContent value="daily" className="pt-4">
-              <ChartContainer
-                config={{
-                  sales: {
-                    label: "Sales ($)",
-                    color: "hsl(var(--chart-1))",
-                  },
-                  transactions: {
-                    label: "Transactions",
-                    color: "hsl(var(--chart-2))",
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={dailySalesData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="day" />
-                    <YAxis
-                      yAxisId="left"
-                      orientation="left"
-                      stroke="var(--color-sales)"
-                    />
-                    <YAxis
-                      yAxisId="right"
-                      orientation="right"
-                      stroke="var(--color-transactions)"
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Legend />
-                    <Line
-                      yAxisId="left"
-                      type="monotone"
-                      dataKey="sales"
-                      stroke="var(--color-sales)"
-                      activeDot={{ r: 8 }}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="transactions"
-                      stroke="var(--color-transactions)"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              <SalesForecastChart />
             </TabsContent>
             <TabsContent value="weekly" className="pt-4">
               <ChartContainer

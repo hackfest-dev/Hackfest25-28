@@ -8,8 +8,11 @@ importers:
 
   .:
     dependencies:
+      '@auth/core':
+        specifier: ^0.38.0
+        version: 0.38.0(nodemailer@6.10.1)
       '@auth/prisma-adapter':
-        specifier: ^2.7.2
+        specifier: ^2.8.0
         version: 2.8.0(@prisma/client@6.6.0(prisma@6.6.0(typescript@5.8.3))(typescript@5.8.3))(nodemailer@6.10.1)
       '@prisma/client':
         specifier: ^6.5.0
