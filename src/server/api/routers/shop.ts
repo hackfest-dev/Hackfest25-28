@@ -75,59 +75,68 @@ export const shopRouter = createTRPCRouter({
   createShopItem: publicProcedure
     .input(
       z.object({
+        name: z.string(),
+      brand: z.string(),
         shopkeeperId: z.number(),
-        inventoryId: z.number(),
         price: z.number(),
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const inventory = await ctx.db.inventory.create({
+        data:{
+          quantity: 0,
+        }
+      });
+      
       const shopItem = await ctx.db.shopItem.create({
         data: {
+          name: input.name,
+          brand: input.brand,
           shopkeeperId: input.shopkeeperId,
-          inventoryId: input.inventoryId,
           price: input.price,
+          inventoryId: inventory.id,
         },
       });
       return shopItem;
     }),
-  getShopItem: publicProcedure
-    .input(z.object({ id: z.number() }))
+  getShopItems: publicProcedure
+    .input(z.object({ shopkeeperid: z.number() }))
     .query(async ({ input, ctx }) => {
-      const shopItem = await ctx.db.shopItem.findUnique({
-        where: { id: input.id },
-        include: {
+      const shopItems = await ctx.db.shopItem.findMany({
+        where: { shopkeeperId: input.shopkeeperid },
+        include:{
           shopkeeper: true,
           inventory: true,
           billItem: true,
-        },
+        }
       });
-      return shopItem;
+      return shopItems;
     }),
-  updateShopItem: publicProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        shopkeeperId: z.number().optional(),
-        inventoryId: z.number().optional(),
-        price: z.number().optional(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const shopItem = await ctx.db.shopItem.update({
-        where: { id: input.id },
-        data: {
-          shopkeeperId: input.shopkeeperId,
-          inventoryId: input.inventoryId,
-          price: input.price,
-        },
-      });
-      return shopItem;
-    }),
+  // updateShopItem: publicProcedure
+  //   .input(
+  //     z.object({
+  //       id: z.number(),
+  //       shopkeeperId: z.number().optional(),
+  //       inventoryId: z.number().optional(),
+  //       price: z.number().optional(),
+  //     })
+  //   )
+  //   .mutation(async ({ input, ctx }) => {
+  //     const shopItem = await ctx.db.shopItem.update({
+  //       where: { id: input.id },
+  //       data: {
+  //         shopkeeperId: input.shopkeeperId,
+  //         inventoryId: input.inventoryId,
+  //         price: input.price,
+  //       },
+  //     });
+  //     return shopItem;
+  //   }),
   deleteShopItem: publicProcedure
-    .input(z.object({ id: z.number() }))
+    .input(z.object({ shopItemid: z.number() }))
     .mutation(async ({ input, ctx }) => {
       await ctx.db.shopItem.delete({
-        where: { id: input.id },
+        where: { id: input.shopItemid },
       });
       return { success: true };
     }),
