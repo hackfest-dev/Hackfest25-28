@@ -34,7 +34,7 @@ model myProduct {
   id             Int          @id @default(autoincrement())
   manufacturerId Int
   name           String
-  skuId          Int
+  skuId          Int                                                      
   category       String
   price          Float
   minOrder       Int          @default(1)
